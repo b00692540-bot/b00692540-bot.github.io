@@ -284,13 +284,28 @@ function Index() {
               <Reveal key={c.name} delay={i * 60}>
                 <div
                   onClick={() => c.img && setActivePdf(c.img)}
-                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.img ? "cursor-pointer hover:border-accent hover:bg-accent/5 hover:shadow-sm" : ""}`}
+                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.img ? "cursor-pointer hover:border-accent hover:shadow-md" : ""}`}
                 >
-                  <div className="font-serif text-lg text-foreground transition-colors duration-300 group-hover:text-accent">{c.name}</div>
-                  <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{c.issuer}</div>
+                  <div className="font-serif text-lg text-foreground transition-colors duration-300 group-hover:text-accent">
+                    {c.name}
+                  </div>
+                  <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    {c.issuer}
+                  </div>
+
+                  {/* Expanding thumbnail on hover */}
                   {c.img && (
-                    <div className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-accent/60 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                      View certificate ↗
+                    <div className="overflow-hidden max-h-0 group-hover:max-h-52 transition-[max-height] duration-500 ease-in-out">
+                      <div className="pt-4">
+                        <img
+                          src={c.img}
+                          alt={c.name}
+                          className="w-full object-contain object-top opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                        />
+                        <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-accent">
+                          Click to view full ↗
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
