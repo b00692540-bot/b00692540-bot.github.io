@@ -120,8 +120,9 @@ function Index() {
             </Reveal>
             <Reveal delay={240}>
               <p className="mt-8 max-w-lg text-muted-foreground leading-relaxed">
-                Senior commercial leader with 8+ years at Marriott International, delivering luxury experiences across six countries.
-                Specialising in go-to-market strategy, concept launches, and P&amp;L ownership — from inception to full market entry.
+                Built and launched concepts across six countries, defined brands, 
+                and built teams from inception. Now focused on commercial strategy, market entry, 
+                and growth at a regional level, driven by a desire for greater challenges, scale and complexity.
               </p>
             </Reveal>
             <Reveal delay={320}>
@@ -200,7 +201,7 @@ function Index() {
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
-                Recognised <em>beyond</em> the industry.
+                Featured in.
               </h2>
             </Reveal>
             <Reveal delay={240}>
