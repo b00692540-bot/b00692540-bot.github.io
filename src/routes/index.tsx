@@ -23,13 +23,13 @@ const education = [
 ];
 
 const press = [
-  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn" },
-  { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/" },
-  { tag: "JustLuxe · Luxury Travel", title: "Tradition Plays Key Role in Service & Style at The St. Regis Washington DC", href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/" },
-  { tag: "Wine Spectator · Award", title: "Kembara, Phoenix — Award of Excellence", href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara" },
-  { tag: "Video · JW Marriott", title: "Kembara at JW Marriott Desert Ridge", href: "https://www.youtube.com/watch?v=4_dFKeIZPs4" },
-  { tag: "Instagram · Feature", title: "Kembara by Angelo Sosa — Behind the Concept", href: "https://www.instagram.com/p/C4_Qh4eOF-y/" },
-  { tag: "World Itineraries · 2019", title: "The St. Regis Washington: Lavish, Historic & Neighbouring the White House", href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/" },
+  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/United_Nation.jpg" },
+  { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/", img: "/press-forbes.jpg" },
+  { tag: "JustLuxe · Luxury Travel", title: "Tradition Plays Key Role in Service & Style at The St. Regis Washington DC", href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/", img: "/press-justluxe.jpg" },
+  { tag: "Wine Spectator · Award", title: "Kembara, Phoenix — Award of Excellence", href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara", img: "/press-winespectator.jpg" },
+  { tag: "Video · JW Marriott", title: "Kembara at JW Marriott Desert Ridge", href: "https://www.youtube.com/watch?v=4_dFKeIZPs4", img: "/press-youtube.jpg" },
+  { tag: "Instagram · Feature", title: "Kembara by Angelo Sosa — Behind the Concept", href: "https://www.instagram.com/p/C4_Qh4eOF-y/", img: "/press-instagram.jpg" },
+  { tag: "World Itineraries · 2019", title: "The St. Regis Washington: Lavish, Historic & Neighbouring the White House", href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/", img: "/press-worlditineraries.jpg" },
 ];
 
 const certs = [
@@ -198,9 +198,16 @@ function Index() {
                   href={p.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex items-start justify-between gap-8 border-t border-border py-7 transition-colors duration-300 last:border-b hover:border-accent"
+                  className="group flex items-start gap-6 border-t border-border py-7 transition-colors duration-300 last:border-b hover:border-accent"
                 >
-                  <div className="flex-1">
+                  <div className="hidden shrink-0 sm:block w-20 h-16 overflow-hidden bg-muted">
+                    <img
+                      src={p.img}
+                      alt=""
+                      className="h-full w-full object-cover opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-300 group-hover:text-accent">
                       {p.tag}
                     </div>
@@ -208,7 +215,7 @@ function Index() {
                       &ldquo;{p.title}&rdquo;
                     </div>
                   </div>
-                  <span aria-hidden className="mt-2 text-foreground/60 transition-all duration-300 group-hover:text-accent group-hover:translate-x-1">↗</span>
+                  <span aria-hidden className="mt-2 shrink-0 text-foreground/60 transition-all duration-300 group-hover:text-accent group-hover:translate-x-1">↗</span>
                 </a>
               </Reveal>
             ))}
