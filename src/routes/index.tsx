@@ -1,16 +1,149 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Christopher Biguet — Commercial Strategy & Business Development</title>
-    <meta name="description" content="Senior commercial manager. Go-to-market strategy, concept launches and commercial growth across EMEA and APAC." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+import { createFileRoute } from "@tanstack/react-router";
+import { Nav } from "@/components/editorial/Nav";
+import { Marquee } from "@/components/editorial/Marquee";
+import { Reveal } from "@/components/editorial/Reveal";
+
+export const Route = createFileRoute("/")({
+  component: Index,
+});
+
+const stats = [
+  { n: "8+", label: "Years", desc: "with Marriott International delivering luxury experiences." },
+  { n: "$5M", label: "Concept Launch", desc: "Brand positioning, pricing strategy and full market entry from inception." },
+  { n: "50+", label: "Team Members", desc: "Recruited, led and grown for new openings across multi-property luxury operations." },
+  { n: "6+", label: "Countries", desc: "United States · UAE · France · Belgium · United Kingdom · Singapore." },
+];
+
+const press = [
+  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn" },
+  { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/" },
+  { tag: "JustLuxe · Luxury Travel", title: "Tradition Plays Key Role in Service & Style at The St. Regis Washington DC", href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/" },
+  { tag: "Wine Spectator · Award", title: "Kembara, Phoenix — Award of Excellence", href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara" },
+  { tag: "Video · JW Marriott", title: "Kembara at JW Marriott Desert Ridge", href: "https://www.youtube.com/watch?v=4_dFKeIZPs4" },
+  { tag: "Instagram · Feature", title: "Kembara by Angelo Sosa — Behind the Concept", href: "https://www.instagram.com/p/C4_Qh4eOF-y/" },
+  { tag: "World Itineraries · 2019", title: "The St. Regis Washington: Lavish, Historic & Neighbouring the White House", href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/" },
+];
+
+const certs = [
+  { name: "Spreadsheet Modelling", issuer: "Harvard University" },
+  { name: "Financial Accounting", issuer: "AHLEI" },
+  { name: "Python for Data Science", issuer: "University of Michigan" },
+  { name: "Power BI", issuer: "Microsoft" },
+  { name: "Tableau Data Visualisation", issuer: "Duke University" },
+  { name: "Sales & Marketing", issuer: "AHLEI" },
+  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR" },
+  { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
+];
+
+function SectionLabel({ n, children }: { n: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-12 flex items-center gap-5">
+      <span className="font-serif text-sm italic text-accent">{n}</span>
+      <span className="h-px flex-1 max-w-16 bg-border" />
+      <span className="eyebrow">{children}</span>
+    </div>
+  );
+}
+
+function Index() {
+  return (
+    <main id="top" className="bg-background text-foreground">
+      <Nav />
+      <Marquee />
+
+      {/* Stats */}
+      <section className="border-t border-border px-6 py-20 md:px-12">
+        <div className="mx-auto max-w-[1200px] grid grid-cols-2 gap-8 md:grid-cols-4">
+          {stats.map((s, i) => (
+            <Reveal key={s.label} delay={i * 80}>
+              <div className="text-center">
+                <div className="font-serif text-5xl font-light text-foreground">{s.n}</div>
+                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{s.label}</div>
+                <div className="mt-2 text-sm text-muted-foreground">{s.desc}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Press */}
+      <section id="featured" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
+          <div className="mb-16 lg:col-span-5 lg:mb-0">
+            <Reveal>
+              <SectionLabel n="04">Press & Features</SectionLabel>
+            </Reveal>
+            <Reveal delay={120}>
+              <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+                Recognised <em>beyond</em> the industry.
+              </h2>
+            </Reveal>
+            <Reveal delay={240}>
+              <a
+                href="https://linkedin.com/in/christopher-biguet"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+              >
+                See more on LinkedIn
+                <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </a>
+            </Reveal>
+          </div>
+
+          <ul className="lg:col-span-7">
+            {press.map((p, i) => (
+              <Reveal key={p.href} delay={i * 80} as="li">
+                <a
+                  href={p.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-start justify-between gap-8 border-t border-border py-7 transition-colors duration-300 last:border-b hover:border-accent"
+                >
+                  <div className="flex-1">
+                    <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-300 group-hover:text-accent">
+                      {p.tag}
+                    </div>
+                    <div className="mt-3 font-serif text-xl leading-snug text-foreground transition-transform duration-300 group-hover:translate-x-1 md:text-2xl">
+                      "{p.title}"
+                    </div>
+                  </div>
+                  <span aria-hidden className="mt-2 text-foreground/60 transition-all duration-300 group-hover:text-accent group-hover:translate-x-1">↗</span>
+                </a>
+              </Reveal>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Certifications */}
+      <section id="certifications" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] text-center">
+          <Reveal>
+            <div className="mb-12 flex items-center justify-center gap-5">
+              <span className="font-serif text-sm italic text-accent">05</span>
+              <span className="h-px w-16 bg-border" />
+              <span className="eyebrow">Credentials</span>
+              <span className="h-px w-16 bg-border" />
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 className="display mx-auto max-w-3xl text-foreground" style={{ fontSize: "clamp(40px, 5vw, 64px)" }}>
+              Continuously <em>refining</em> the craft.
+            </h2>
+          </Reveal>
+          <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4">
+            {certs.map((c, i) => (
+              <Reveal key={c.name} delay={i * 60}>
+                <div className="border border-border p-6 text-left">
+                  <div className="font-serif text-lg text-foreground">{c.name}</div>
+                  <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{c.issuer}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
