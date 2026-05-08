@@ -17,10 +17,9 @@ const stats = [
 
 const education = [
   {
-    degree: "Global MBA — Innovation & Strategy",
+    degree: "Global MBA – Master’s in Business Management",
     school: "ESSEC Business School",
-    detail: "Pro bono consultancy with the United Nations (UNCTAD) — Fundraising strategy & financial roadmap.",
-  },
+    detail: "MOM-recognized Top-Tier Institution (+20 Compass points) Specialization in Finance, Consulting and Digital Transformation",},
 ];
 
 const press = [
