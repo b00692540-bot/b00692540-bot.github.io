@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Change this to your branch name if it's different
+      - main
 
 permissions:
   contents: read
@@ -17,16 +17,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Build
-        run: npm run build && cp dist/client/index.html dist/client/404.html
+        run: bun run build && cp dist/client/index.html dist/client/404.html
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
