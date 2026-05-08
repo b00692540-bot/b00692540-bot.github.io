@@ -14,6 +14,14 @@ const stats = [
   { n: "6+", label: "Countries", desc: "United States · UAE · France · Belgium · United Kingdom · Singapore." },
 ];
 
+const education = [
+  {
+    degree: "Global MBA — Innovation & Strategy",
+    school: "ESSEC Business School",
+    detail: "Pro bono consultancy with the United Nations (UNCTAD) — Fundraising strategy & financial roadmap.",
+  },
+];
+
 const press = [
   { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn" },
   { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/" },
@@ -49,20 +57,112 @@ function Index() {
   return (
     <main id="top" className="bg-background text-foreground">
       <Nav />
+
+      {/* Hero */}
+      <section className="flex min-h-[90vh] flex-col justify-end px-6 pb-20 pt-40 md:px-12 md:pb-28 md:pt-52">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <Reveal>
+            <span className="eyebrow">Senior Commercial Manager</span>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1 className="display mt-6 text-foreground" style={{ fontSize: "clamp(60px, 9vw, 128px)" }}>
+              Christopher<br /><em>Biguet</em>
+            </h1>
+          </Reveal>
+          <Reveal delay={200}>
+            <p className="mt-8 max-w-md text-muted-foreground">
+              Commercial strategy, go-to-market execution and luxury concept development across EMEA &amp; APAC.
+            </p>
+          </Reveal>
+          <Reveal delay={320}>
+            <div className="mt-12 flex flex-wrap items-center gap-8">
+              <a
+                href="#about"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+              >
+                Explore
+                <span aria-hidden>↓</span>
+              </a>
+              <a
+                href="#contact"
+                className="text-[12px] font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-300 hover:text-foreground"
+              >
+                Get in touch
+              </a>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       <Marquee />
 
-      {/* Stats */}
-      <section className="border-t border-border px-6 py-20 md:px-12">
-        <div className="mx-auto max-w-[1200px] grid grid-cols-2 gap-8 md:grid-cols-4">
-          {stats.map((s, i) => (
-            <Reveal key={s.label} delay={i * 80}>
-              <div className="text-center">
-                <div className="font-serif text-5xl font-light text-foreground">{s.n}</div>
-                <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{s.label}</div>
-                <div className="mt-2 text-sm text-muted-foreground">{s.desc}</div>
-              </div>
+      {/* About */}
+      <section id="about" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
+          <div className="mb-16 lg:col-span-7 lg:mb-0">
+            <Reveal>
+              <SectionLabel n="02">About</SectionLabel>
             </Reveal>
-          ))}
+            <Reveal delay={120}>
+              <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+                Where strategy <em>meets</em> execution.
+              </h2>
+            </Reveal>
+            <Reveal delay={240}>
+              <p className="mt-8 max-w-lg text-muted-foreground leading-relaxed">
+                Senior commercial leader with 8+ years at Marriott International, delivering luxury experiences across six countries.
+                Specialising in go-to-market strategy, concept launches, and P&amp;L ownership — from inception to full market entry.
+              </p>
+            </Reveal>
+            <Reveal delay={320}>
+              <a
+                href="/SG_Christopher_BIGUET_CV_Manager.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+              >
+                Download CV
+                <span aria-hidden>↓</span>
+              </a>
+            </Reveal>
+          </div>
+
+          <div className="lg:col-span-5 grid grid-cols-2 gap-8 content-start">
+            {stats.map((s, i) => (
+              <Reveal key={s.label} delay={i * 80}>
+                <div>
+                  <div className="font-serif text-5xl font-light text-foreground">{s.n}</div>
+                  <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{s.label}</div>
+                  <div className="mt-2 text-sm text-muted-foreground">{s.desc}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Education */}
+      <section id="education" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <SectionLabel n="03">Education</SectionLabel>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+              Grounded in <em>rigour</em>.
+            </h2>
+          </Reveal>
+          <div className="mt-16">
+            {education.map((e, i) => (
+              <Reveal key={e.school} delay={i * 80}>
+                <div className="border-t border-border py-10 last:border-b">
+                  <div className="font-serif text-2xl text-foreground md:text-3xl">{e.school}</div>
+                  <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{e.degree}</div>
+                  <p className="mt-4 max-w-xl text-sm text-muted-foreground">{e.detail}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -71,7 +171,7 @@ function Index() {
         <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
           <div className="mb-16 lg:col-span-5 lg:mb-0">
             <Reveal>
-              <SectionLabel n="04">Press & Features</SectionLabel>
+              <SectionLabel n="04">Press &amp; Features</SectionLabel>
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
@@ -105,7 +205,7 @@ function Index() {
                       {p.tag}
                     </div>
                     <div className="mt-3 font-serif text-xl leading-snug text-foreground transition-transform duration-300 group-hover:translate-x-1 md:text-2xl">
-                      "{p.title}"
+                      &ldquo;{p.title}&rdquo;
                     </div>
                   </div>
                   <span aria-hidden className="mt-2 text-foreground/60 transition-all duration-300 group-hover:text-accent group-hover:translate-x-1">↗</span>
@@ -141,6 +241,54 @@ function Index() {
                 </div>
               </Reveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] text-center">
+          <Reveal>
+            <div className="mb-12 flex items-center justify-center gap-5">
+              <span className="font-serif text-sm italic text-accent">06</span>
+              <span className="h-px w-16 bg-border" />
+              <span className="eyebrow">Contact</span>
+              <span className="h-px w-16 bg-border" />
+            </div>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 className="display mx-auto max-w-3xl text-foreground" style={{ fontSize: "clamp(40px, 5vw, 64px)" }}>
+              Let&rsquo;s <em>connect</em>.
+            </h2>
+          </Reveal>
+          <Reveal delay={200}>
+            <p className="mt-6 text-muted-foreground">
+              Open to senior commercial and business development opportunities in luxury hospitality.
+            </p>
+          </Reveal>
+          <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <Reveal delay={320}>
+              <a
+                href="https://linkedin.com/in/christopher-biguet"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+              >
+                Connect on LinkedIn
+                <span aria-hidden>→</span>
+              </a>
+            </Reveal>
+            <Reveal delay={400}>
+              <a
+                href="/SG_Christopher_BIGUET_CV_Manager.pdf"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+              >
+                Download CV
+                <span aria-hidden>↓</span>
+              </a>
+            </Reveal>
           </div>
         </div>
       </section>
