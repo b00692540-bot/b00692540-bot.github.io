@@ -19,7 +19,13 @@ const education = [
   {
     degree: "Global MBA – Master’s in Business Management",
     school: "ESSEC Business School",
-    detail: "MOM-recognized Top-Tier Institution (+20 Compass points) Specialization in Finance, Consulting and Digital Transformation",},
+    detail: "MOM-recognized Top-Tier Institution (+20 Compass points) Specialization in Finance, Consulting and Digital Transformation",
+  },
+  {
+    degree: "Bachelor’s Degree in Hospitality Management",
+    school: "École de Savignac · Stratford-upon-Avon University",
+    detail: "Dual degree — France & United Kingdom.",
+  },
 ];
 
 const press = [
