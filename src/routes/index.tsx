@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Marquee } from "@/components/editorial/Marquee";
@@ -34,12 +35,12 @@ const press = [
 
 const certs = [
   { name: "Spreadsheet Modelling", issuer: "Harvard University" },
-  { name: "Financial Accounting", issuer: "AHLEI" },
-  { name: "Python for Data Science", issuer: "University of Michigan" },
-  { name: "Power BI", issuer: "Microsoft" },
-  { name: "Tableau Data Visualisation", issuer: "Duke University" },
-  { name: "Sales & Marketing", issuer: "AHLEI" },
-  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR" },
+  { name: "Financial Accounting", issuer: "AHLEI", pdf: "/Accounting_Certification.pdf" },
+  { name: "Python for Data Science", issuer: "University of Michigan", pdf: "/Python_Certification.pdf" },
+  { name: "Power BI", issuer: "Microsoft", pdf: "/Power_BI_Certification.pdf" },
+  { name: "Tableau Data Visualisation", issuer: "Duke University", pdf: "/Tableau_Certification.pdf" },
+  { name: "Sales & Marketing", issuer: "AHLEI", pdf: "/Sales_Certification.pdf" },
+  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", pdf: "/STR_Certification.pdf" },
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
 ];
 
@@ -54,6 +55,14 @@ function SectionLabel({ n, children }: { n: string; children: React.ReactNode })
 }
 
 function Index() {
+  const [activePdf, setActivePdf] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActivePdf(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <main id="top" className="bg-background text-foreground">
       <Nav />
@@ -268,13 +277,46 @@ function Index() {
           <div className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4">
             {certs.map((c, i) => (
               <Reveal key={c.name} delay={i * 60}>
-                <div className="border border-border p-6 text-left">
-                  <div className="font-serif text-lg text-foreground">{c.name}</div>
+                <div
+                  onClick={() => c.pdf && setActivePdf(c.pdf)}
+                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.pdf ? "cursor-pointer hover:border-accent hover:bg-accent/5 hover:shadow-sm" : ""}`}
+                >
+                  <div className="font-serif text-lg text-foreground transition-colors duration-300 group-hover:text-accent">{c.name}</div>
                   <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{c.issuer}</div>
+                  {c.pdf && (
+                    <div className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-accent/60 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                      View certificate ↗
+                    </div>
+                  )}
                 </div>
               </Reveal>
             ))}
           </div>
+
+          {/* PDF Modal */}
+          {activePdf && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/70 p-4 backdrop-blur-sm md:p-10"
+              onClick={() => setActivePdf(null)}
+            >
+              <div
+                className="relative flex w-full max-w-3xl flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setActivePdf(null)}
+                  className="mb-3 self-end text-[11px] font-medium uppercase tracking-[0.22em] text-background/80 transition-colors duration-200 hover:text-background"
+                >
+                  Close ✕
+                </button>
+                <iframe
+                  src={activePdf}
+                  title="Certificate"
+                  className="h-[80vh] w-full border-0 bg-background"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
