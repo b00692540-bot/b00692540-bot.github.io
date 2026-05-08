@@ -9,9 +9,11 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   tanstackStart: {
     spa: {},
+    prerender: {
+      enabled: false,
+    },
   },
   vite: {
-    // Custom domain (christopherbiguet.com) serves from root, so base stays "/"
     base: "/",
   },
 });
