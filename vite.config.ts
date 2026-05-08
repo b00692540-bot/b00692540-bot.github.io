@@ -11,5 +11,14 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+    // This tells the builder exactly where to look for the server files
+    output: {
+      dir: ".output",
+      serverDir: ".output/server",
+      publicDir: ".output/public",
+    },
+    prerender: {
+      enabled: true,
+    },
   },
 });
