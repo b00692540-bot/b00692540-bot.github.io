@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import tsConfigPaths from "vite-tsconfig-paths";
+import path from "path";
 
-// Plain Vite config — no SSR, no prerender, pure static SPA for GitHub Pages
 export default defineConfig({
   base: "/",
   plugins: [
@@ -13,12 +13,12 @@ export default defineConfig({
     tailwindcss(),
     tsConfigPaths(),
   ],
-  build: {
-    outDir: "dist/client",
-  },
   resolve: {
     alias: {
-      "@": "/src",
+      "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    outDir: "dist",
   },
 });
