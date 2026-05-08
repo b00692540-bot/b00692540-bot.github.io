@@ -34,13 +34,13 @@ const press = [
 ];
 
 const certs = [
-  { name: "Spreadsheet Modelling", issuer: "Harvard University" },
-  { name: "Financial Accounting", issuer: "AHLEI", pdf: "/Accounting_Certification.pdf" },
-  { name: "Python for Data Science", issuer: "University of Michigan", pdf: "/Python_Certification.pdf" },
-  { name: "Power BI", issuer: "Microsoft", pdf: "/Power_BI_Certification.pdf" },
-  { name: "Tableau Data Visualisation", issuer: "Duke University", pdf: "/Tableau_Certification.pdf" },
-  { name: "Sales & Marketing", issuer: "AHLEI", pdf: "/Sales_Certification.pdf" },
-  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", pdf: "/STR_Certification.pdf" },
+  { name: "Spreadsheet Modelling", issuer: "Harvard University", img: "/Spreadsheet_Certification.jpg" },
+  { name: "Financial Accounting", issuer: "AHLEI", img: "/Accounting_Certification.jpg" },
+  { name: "Python for Data Science", issuer: "University of Michigan", img: "/Python_Certification.jpg" },
+  { name: "Power BI", issuer: "Microsoft", img: "/Power_BI_Certification.jpg" },
+  { name: "Tableau Data Visualisation", issuer: "Duke University", img: "/Tableau_Certification.jpg" },
+  { name: "Sales & Marketing", issuer: "AHLEI", img: "/Sales_Certification.jpg" },
+  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", img: "/STR_Certification.jpg" },
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
 ];
 
@@ -278,12 +278,12 @@ function Index() {
             {certs.map((c, i) => (
               <Reveal key={c.name} delay={i * 60}>
                 <div
-                  onClick={() => c.pdf && setActivePdf(c.pdf)}
-                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.pdf ? "cursor-pointer hover:border-accent hover:bg-accent/5 hover:shadow-sm" : ""}`}
+                  onClick={() => c.img && setActivePdf(c.img)}
+                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.img ? "cursor-pointer hover:border-accent hover:bg-accent/5 hover:shadow-sm" : ""}`}
                 >
                   <div className="font-serif text-lg text-foreground transition-colors duration-300 group-hover:text-accent">{c.name}</div>
                   <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{c.issuer}</div>
-                  {c.pdf && (
+                  {c.img && (
                     <div className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-accent/60 transition-opacity duration-300 opacity-0 group-hover:opacity-100">
                       View certificate ↗
                     </div>
@@ -309,10 +309,10 @@ function Index() {
                 >
                   Close ✕
                 </button>
-                <iframe
+                <img
                   src={activePdf}
-                  title="Certificate"
-                  className="h-[80vh] w-full border-0 bg-background"
+                  alt="Certificate"
+                  className="w-full max-h-[80vh] object-contain bg-background"
                 />
               </div>
             </div>
