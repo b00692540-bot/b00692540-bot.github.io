@@ -59,8 +59,18 @@ function Index() {
       <Nav />
 
       {/* Hero */}
-      <section className="flex min-h-[90vh] flex-col justify-end px-6 pb-20 pt-40 md:px-12 md:pb-28 md:pt-52">
-        <div className="mx-auto w-full max-w-[1200px]">
+      <section className="relative flex min-h-[90vh] flex-col justify-end overflow-hidden px-6 pb-20 pt-40 md:px-12 md:pb-28 md:pt-52">
+        {/* Hero photo — right side, desktop only */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[45%] lg:block">
+          <img
+            src="/Christopher_hero.jpg"
+            alt="Christopher Biguet"
+            className="h-full w-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
+        </div>
+
+        <div className="relative mx-auto w-full max-w-[1200px]">
           <Reveal>
             <span className="eyebrow">Senior Commercial Manager</span>
           </Reveal>
@@ -143,25 +153,40 @@ function Index() {
 
       {/* Education */}
       <section id="education" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
-        <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <SectionLabel n="03">Education</SectionLabel>
-          </Reveal>
-          <Reveal delay={120}>
-            <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
-              Grounded in <em>rigour</em>.
-            </h2>
-          </Reveal>
-          <div className="mt-16">
-            {education.map((e, i) => (
-              <Reveal key={e.school} delay={i * 80}>
-                <div className="border-t border-border py-10 last:border-b">
-                  <div className="font-serif text-2xl text-foreground md:text-3xl">{e.school}</div>
-                  <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{e.degree}</div>
-                  <p className="mt-4 max-w-xl text-sm text-muted-foreground">{e.detail}</p>
-                </div>
-              </Reveal>
-            ))}
+        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-7">
+            <Reveal>
+              <SectionLabel n="03">Education</SectionLabel>
+            </Reveal>
+            <Reveal delay={120}>
+              <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+                Grounded in <em>rigour</em>.
+              </h2>
+            </Reveal>
+            <div className="mt-16">
+              {education.map((e, i) => (
+                <Reveal key={e.school} delay={i * 80}>
+                  <div className="border-t border-border py-10 last:border-b">
+                    <div className="font-serif text-2xl text-foreground md:text-3xl">{e.school}</div>
+                    <div className="mt-2 text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{e.degree}</div>
+                    <p className="mt-4 max-w-xl text-sm text-muted-foreground">{e.detail}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-16 lg:col-span-5 lg:mt-0">
+            <Reveal delay={160}>
+              <div className="overflow-hidden">
+                <img
+                  src="/Christopher_profile_1.jpeg"
+                  alt="Christopher Biguet"
+                  className="h-full w-full object-cover object-top"
+                  style={{ maxHeight: "520px" }}
+                />
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -251,6 +276,16 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Group Regis — full-width transition */}
+      <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden md:h-[75vh]">
+        <img
+          src="/Group_Regis.jpeg"
+          alt="The St. Regis"
+          className="h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-foreground/20" />
+      </div>
 
       {/* Contact */}
       <section id="contact" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
