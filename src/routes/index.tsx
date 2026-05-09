@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Marquee } from "@/components/editorial/Marquee";
@@ -55,6 +55,38 @@ function SectionLabel({ n, children }: { n: string; children: React.ReactNode })
       <span className="font-serif text-sm italic text-accent">{n}</span>
       <span className="h-px flex-1 max-w-16 bg-border" />
       <span className="eyebrow">{children}</span>
+    </div>
+  );
+}
+
+function ActionShotVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !muted;
+      setMuted(!muted);
+    }
+  };
+
+  return (
+    <div className="relative mt-8 overflow-hidden rounded-sm border border-border w-full max-w-xs">
+      <video
+        ref={videoRef}
+        src="/future_content/Action_Shot_Chris.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full object-cover"
+      />
+      <button
+        onClick={toggleMute}
+        className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-sm bg-black/60 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+      >
+        {muted ? "🔇 Unmute" : "🔊 Mute"}
+      </button>
     </div>
   );
 }
@@ -228,6 +260,9 @@ function Index() {
                 See more on LinkedIn
                 <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </a>
+            </Reveal>
+            <Reveal delay={360}>
+              <ActionShotVideo />
             </Reveal>
           </div>
 
