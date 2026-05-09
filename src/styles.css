@@ -247,6 +247,11 @@
   background-color: rgba(0, 0, 0, 0.07);
 }
 
+/* ============== Press Carousel ============== */
+.press-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 /* ============== Marquee ============== */
 @keyframes marquee {
   from { transform: translateX(0); }

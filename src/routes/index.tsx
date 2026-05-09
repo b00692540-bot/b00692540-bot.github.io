@@ -59,6 +59,113 @@ function SectionLabel({ n, children }: { n: string; children: React.ReactNode })
   );
 }
 
+function PressCarousel({ items }: { items: typeof press }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let rafId: number;
+
+    const update = () => {
+      const cw = el.clientWidth;
+      const cx = el.scrollLeft + cw / 2;
+
+      cardRefs.current.forEach((card) => {
+        if (!card) return;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(cx - cardCenter);
+        const maxDist = card.offsetWidth;
+        const ratio = Math.max(0, 1 - dist / maxDist);
+        const scale = 0.88 + 0.12 * ratio;
+
+        card.style.transform = `scale(${scale})`;
+        card.style.opacity = String(0.65 + 0.35 * ratio);
+
+        const imgEl = card.querySelector<HTMLElement>(".press-img");
+        if (imgEl) {
+          const offset = (cardCenter - cx) / cw;
+          imgEl.style.transform = `scale(1.1) translateX(${offset * -22}px)`;
+        }
+
+        const textEl = card.querySelector<HTMLElement>(".press-text");
+        if (textEl) {
+          const offset = (cardCenter - cx) / cw;
+          textEl.style.transform = `translateX(${offset * 18}px)`;
+        }
+      });
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(update);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    requestAnimationFrame(update);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={scrollRef}
+      className="press-carousel flex gap-3 md:gap-4 overflow-x-scroll snap-x snap-mandatory py-6"
+      style={{
+        scrollbarWidth: "none",
+        paddingLeft: "max(24px, 6vw)",
+        paddingRight: "max(24px, 6vw)",
+      }}
+    >
+      {items.map((p, i) => (
+        <a
+          key={p.href}
+          ref={(el) => {
+            cardRefs.current[i] = el;
+          }}
+          href={p.href}
+          target="_blank"
+          rel="noreferrer"
+          className="group relative flex-none snap-center overflow-hidden"
+          style={{
+            width: "clamp(280px, 76vw, 620px)",
+            aspectRatio: "1 / 1",
+            willChange: "transform, opacity",
+          }}
+        >
+          <img
+            src={p.img}
+            alt=""
+            className="press-img absolute inset-0 h-full w-full object-cover"
+            style={{ willChange: "transform" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+          <div
+            className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
+            style={{ willChange: "transform" }}
+          >
+            <div className="flex items-start justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+                {p.tag}
+              </span>
+              <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                ↗
+              </span>
+            </div>
+            <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
+              &ldquo;{p.title}&rdquo;
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 function ActionShotVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
@@ -239,12 +346,13 @@ function Index() {
       </section>
 
       {/* Press */}
-      <section id="featured" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
-        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
-          <div className="mb-16 lg:col-span-5 lg:mb-0">
-            <Reveal>
-              <SectionLabel n="04">Press &amp; Features</SectionLabel>
-            </Reveal>
+      <section id="featured" className="border-t border-border py-28 md:py-36">
+        {/* Header */}
+        <div className="mx-auto max-w-[1200px] px-6 md:px-12 mb-12">
+          <Reveal>
+            <SectionLabel n="04">Press &amp; Features</SectionLabel>
+          </Reveal>
+          <div className="flex flex-wrap items-end justify-between gap-6">
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
                 Featured in.
@@ -255,46 +363,23 @@ function Index() {
                 href="https://linkedin.com/in/christopher-biguet"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
               >
                 See more on LinkedIn
-                <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+                <span aria-hidden>→</span>
               </a>
             </Reveal>
-            <Reveal delay={360}>
-              <ActionShotVideo />
-            </Reveal>
           </div>
+        </div>
 
-          <ul className="lg:col-span-7">
-            {press.map((p, i) => (
-              <Reveal key={p.href} delay={i * 80} as="li">
-                <a
-                  href={p.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group flex items-start gap-6 border-t border-border py-7 transition-colors duration-300 last:border-b hover:border-accent"
-                >
-                  <div className="hidden shrink-0 sm:block w-20 h-16 overflow-hidden bg-muted">
-                    <img
-                      src={p.img}
-                      alt=""
-                      className="h-full w-full object-cover opacity-80 transition-opacity duration-300 group-hover:opacity-100"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-300 group-hover:text-accent">
-                      {p.tag}
-                    </div>
-                    <div className="mt-3 font-serif text-xl leading-snug text-foreground transition-transform duration-300 group-hover:translate-x-1 md:text-2xl">
-                      &ldquo;{p.title}&rdquo;
-                    </div>
-                  </div>
-                  <span aria-hidden className="mt-2 shrink-0 text-foreground/60 transition-all duration-300 group-hover:text-accent group-hover:translate-x-1">↗</span>
-                </a>
-              </Reveal>
-            ))}
-          </ul>
+        {/* Horizontal scroll carousel */}
+        <PressCarousel items={press} />
+
+        {/* Footer */}
+        <div className="mx-auto max-w-[1200px] px-6 md:px-12 mt-10">
+          <Reveal delay={160}>
+            <ActionShotVideo />
+          </Reveal>
         </div>
       </section>
 
