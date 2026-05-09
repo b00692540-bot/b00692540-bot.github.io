@@ -106,14 +106,18 @@ function Index() {
 
       {/* Hero */}
       <section className="relative flex min-h-[90vh] flex-col justify-end overflow-hidden px-6 pb-20 pt-40 md:px-12 md:pb-28 md:pt-52">
-        {/* Hero photo — right side, desktop only */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[45%] lg:block">
-          <img
-            src="/Christopher_hero.jpg"
-            alt="Christopher Biguet"
-            className="h-full w-full object-cover object-top"
+        {/* Hero video — full background */}
+        <div className="pointer-events-none absolute inset-0">
+          <video
+            src="/Future_Content/Action_Shot_Chris.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
         </div>
 
         <div className="relative mx-auto w-full max-w-[1200px]">
