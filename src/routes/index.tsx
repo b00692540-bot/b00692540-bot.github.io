@@ -117,8 +117,9 @@ function PressCarousel({ items }: { items: typeof press }) {
   }, []);
 
   useEffect(() => {
+    const carousel = scrollRef.current;
     const card = unRevealRef.current;
-    if (!card) return;
+    if (!carousel || !card) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -126,9 +127,9 @@ function PressCarousel({ items }: { items: typeof press }) {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.2 }
     );
-    observer.observe(card);
+    observer.observe(carousel);
     return () => observer.disconnect();
   }, []);
 
