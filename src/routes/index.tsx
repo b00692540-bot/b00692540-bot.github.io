@@ -29,7 +29,7 @@ const education = [
 ];
 
 const press = [
-  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/United_Nation.jpg" },
+  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/Start_UN_Frame.jpg" },
   { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/", img: "/press-forbes.jpg" },
   { tag: "JustLuxe · Luxury Travel", title: "Tradition Plays Key Role in Service & Style at The St. Regis Washington DC", href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/", img: "/press-justluxe.jpg" },
   { tag: "Wine Spectator · Award", title: "Kembara, Phoenix — Award of Excellence", href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara", img: "/press-winespectator.jpg" },
@@ -62,6 +62,7 @@ function SectionLabel({ n, children }: { n: string; children: React.ReactNode })
 function PressCarousel({ items }: { items: typeof press }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const unRevealRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -87,7 +88,11 @@ function PressCarousel({ items }: { items: typeof press }) {
         const imgEl = card.querySelector<HTMLElement>(".press-img");
         if (imgEl) {
           const offset = (cardCenter - cx) / cw;
-          imgEl.style.transform = `scale(1.1) translateX(${offset * -22}px)`;
+          if (card.classList.contains("un-press-card")) {
+            imgEl.style.transform = `translateX(${offset * -22}px)`;
+          } else {
+            imgEl.style.transform = `scale(1.1) translateX(${offset * -22}px)`;
+          }
         }
 
         const textEl = card.querySelector<HTMLElement>(".press-text");
@@ -111,6 +116,22 @@ function PressCarousel({ items }: { items: typeof press }) {
     };
   }, []);
 
+  useEffect(() => {
+    const card = unRevealRef.current;
+    if (!card) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          card.classList.add("is-revealed");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
       ref={scrollRef}
@@ -121,47 +142,62 @@ function PressCarousel({ items }: { items: typeof press }) {
         paddingRight: "max(24px, 6vw)",
       }}
     >
-      {items.map((p, i) => (
-        <a
-          key={p.href}
-          ref={(el) => {
-            cardRefs.current[i] = el;
-          }}
-          href={p.href}
-          target="_blank"
-          rel="noreferrer"
-          className="group relative flex-none snap-center overflow-hidden"
-          style={{
-            width: "clamp(280px, 76vw, 620px)",
-            aspectRatio: "1 / 1",
-            willChange: "transform, opacity",
-          }}
-        >
-          <img
-            src={p.img}
-            alt=""
-            className="press-img absolute inset-0 h-full w-full object-cover"
-            style={{ willChange: "transform" }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-          <div
-            className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
-            style={{ willChange: "transform" }}
+      {items.map((p, i) => {
+        const isUN = i === 0;
+        return (
+          <a
+            key={p.href}
+            ref={(el) => {
+              cardRefs.current[i] = el;
+              if (isUN) unRevealRef.current = el;
+            }}
+            href={p.href}
+            target="_blank"
+            rel="noreferrer"
+            className={`group relative flex-none snap-center overflow-hidden${isUN ? " un-press-card" : ""}`}
+            style={{
+              width: isUN ? "clamp(200px, 42vw, 340px)" : "clamp(280px, 76vw, 620px)",
+              aspectRatio: isUN ? "3 / 4" : "1 / 1",
+              willChange: "transform, opacity",
+            }}
           >
-            <div className="flex items-start justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
-                {p.tag}
-              </span>
-              <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                ↗
-              </span>
+            {isUN ? (
+              <div className="press-img absolute inset-0 overflow-hidden" style={{ willChange: "transform" }}>
+                <img
+                  src={p.img}
+                  alt=""
+                  className="un-press-img h-full w-full object-cover"
+                  style={{ willChange: "transform" }}
+                />
+              </div>
+            ) : (
+              <img
+                src={p.img}
+                alt=""
+                className="press-img absolute inset-0 h-full w-full object-cover"
+                style={{ willChange: "transform" }}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+            <div
+              className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
+              style={{ willChange: "transform" }}
+            >
+              <div className="flex items-start justify-between">
+                <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+                  {p.tag}
+                </span>
+                <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  ↗
+                </span>
+              </div>
+              <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
+                &ldquo;{p.title}&rdquo;
+              </div>
             </div>
-            <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
-              &ldquo;{p.title}&rdquo;
-            </div>
-          </div>
-        </a>
-      ))}
+          </a>
+        );
+      })}
     </div>
   );
 }

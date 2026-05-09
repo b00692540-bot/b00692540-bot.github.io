@@ -263,3 +263,31 @@
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+
+/* ============== UN Card Reveal Effect ============== */
+.un-press-card {
+  clip-path: inset(0 0 100% 0);
+}
+
+.un-press-card.is-revealed {
+  animation: un-card-reveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes un-card-reveal {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0% 0); }
+}
+
+.un-press-img {
+  transform: scale(1.3);
+  transform-origin: center center;
+}
+
+.un-press-card.is-revealed .un-press-img {
+  animation: un-kenburns-out 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes un-kenburns-out {
+  from { transform: scale(1.3); }
+  to   { transform: scale(1.0); }
+}
