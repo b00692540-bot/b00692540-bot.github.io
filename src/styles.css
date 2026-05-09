@@ -214,6 +214,88 @@
   }
 }
 
+/* ============== Floating Pill Nav ============== */
+@keyframes water-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes water-shimmer {
+  0%   { opacity: 0.0; transform: translateX(-100%) skewX(-20deg); }
+  50%  { opacity: 0.6; }
+  100% { opacity: 0.0; transform: translateX(300%) skewX(-20deg); }
+}
+
+.nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 5px 6px;
+  background: rgba(250, 248, 245, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(200, 190, 180, 0.45);
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: background 0.7s ease, box-shadow 0.7s ease, border-color 0.7s ease, backdrop-filter 0.7s ease;
+  overflow: hidden;
+}
+
+.nav-pill--scrolled {
+  background: linear-gradient(
+    125deg,
+    rgba(185, 220, 240, 0.52) 0%,
+    rgba(210, 235, 248, 0.42) 20%,
+    rgba(230, 245, 255, 0.58) 40%,
+    rgba(200, 228, 245, 0.44) 60%,
+    rgba(180, 215, 238, 0.56) 80%,
+    rgba(210, 235, 248, 0.42) 100%
+  );
+  background-size: 400% 400%;
+  animation: water-flow 7s ease infinite;
+  backdrop-filter: blur(24px) saturate(200%) brightness(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(200%) brightness(1.06);
+  border-color: rgba(140, 195, 228, 0.55);
+  box-shadow:
+    0 6px 32px rgba(0, 70, 140, 0.13),
+    0 1px 6px rgba(0, 70, 140, 0.07),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(130, 190, 225, 0.35);
+}
+
+.nav-pill--scrolled::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  animation: water-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.nav-pill__link {
+  display: block;
+  padding: 7px 15px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  transition: color 0.25s ease, background-color 0.25s ease;
+}
+
+.nav-pill__link:hover {
+  color: var(--foreground);
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 /* ============== Marquee ============== */
 @keyframes marquee {
   from { transform: translateX(0); }
