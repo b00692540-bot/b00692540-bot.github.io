@@ -74,7 +74,7 @@ function ActionShotVideo() {
     <div className="relative mt-8 overflow-hidden rounded-sm border border-border w-full max-w-xs">
       <video
         ref={videoRef}
-        src="/future_content/Action_Shot_Chris.mp4"
+        src="/Future_Content/Action_Shot_Chris.mp4"
         autoPlay
         loop
         muted
