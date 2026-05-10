@@ -181,8 +181,9 @@ function PressCarousel({ items }: { items: typeof press }) {
     vIndexRef.current = targetVI;
     animate(x, -(targetVI * STRIDE), {
       type: "spring",
-      stiffness: 300,
-      damping: 30,
+      stiffness: 160,
+      damping: 24,
+      mass: 0.9,
       onComplete: () => {
         // After landing, silently reset to middle copy so loop never runs out of track
         let adj = targetVI;
@@ -198,22 +199,31 @@ function PressCarousel({ items }: { items: typeof press }) {
   const snapToRef = useRef(snapTo);
   useEffect(() => { snapToRef.current = snapTo; });
 
-  // Direct trackpad follow — x tracks deltaX in real time, snap fires 100ms after gesture ends
+  // Direct trackpad follow: x tracks deltaX instantly, snap fires after gesture ends
   useEffect(() => {
     const el = containerRef.current;
     if (!el || STRIDE === 0) return;
     let snapTimer: ReturnType<typeof setTimeout>;
+    let lastDeltaX = 0;
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) < 2 || Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+      // Ignore tiny inputs and clearly-vertical scrolls (but allow diagonal-dominant-horizontal)
+      if (Math.abs(e.deltaX) < 3 || Math.abs(e.deltaY) > Math.abs(e.deltaX) * 2.5) return;
       e.preventDefault();
-      // Soft rubber-band clamp: ±1 card beyond the middle copy
+      lastDeltaX = e.deltaX;
+      // Soft rubber-band: ±1 card beyond middle copy
       const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
       clearTimeout(snapTimer);
       snapTimer = setTimeout(() => {
-        snapToRef.current(Math.round(-x.get() / STRIDE));
-      }, 100);
+        const vi = -x.get() / STRIDE;
+        // Velocity bias: if gesture was still moving strongly, commit to that direction
+        let target = Math.round(vi);
+        if (Math.abs(lastDeltaX) > 10) {
+          target = lastDeltaX > 0 ? Math.floor(vi) + 1 : Math.ceil(vi) - 1;
+        }
+        snapToRef.current(target);
+      }, 150);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => { el.removeEventListener("wheel", onWheel); clearTimeout(snapTimer); };
@@ -285,7 +295,7 @@ function PressCarousel({ items }: { items: typeof press }) {
             <motion.div
               drag="x"
               dragConstraints={{ left: -((loopItems.length - 1) * STRIDE), right: 0 }}
-              dragElastic={0.02}
+              dragElastic={0.06}
               style={{ x, position: "absolute", left: PEEK, top: 0, display: "flex", gap: GAP, cursor: dragging ? "grabbing" : "grab" }}
               onDragStart={() => setDragging(true)}
               onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
@@ -342,7 +352,7 @@ function ParallaxImage({ src, alt }: { src: string; alt: string }) {
       const rect = wrap.getBoundingClientRect();
       const viewH = window.innerHeight;
       const progress = (viewH - rect.top) / (viewH + rect.height);
-      const offset = (progress - 0.5) * 120;
+      const offset = (progress - 0.5) * 200;
       img.style.transform = `translateY(${offset}px)`;
     };
 
@@ -356,8 +366,8 @@ function ParallaxImage({ src, alt }: { src: string; alt: string }) {
       ref={wrapRef}
       style={{
         position: "relative",
-        height: "70vh",
-        minHeight: 400,
+        height: "90vh",
+        minHeight: 520,
         width: "100%",
         overflow: "hidden",
       }}
