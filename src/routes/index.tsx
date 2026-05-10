@@ -345,22 +345,21 @@ function PressCarousel({ items }: { items: typeof press }) {
       }
       lastEventMs = now;
 
-      // ── AXIS LOCK — commit once, hold for entire gesture ──────────────────
+      // ── AXIS LOCK — horizontal must be clearly dominant to commit ─────────
       if (!axisLocked) {
         const absDX = Math.abs(e.deltaX);
         const absDY = Math.abs(e.deltaY);
-        if (absDX > 5) {
+        if (absDX > 12 && absDX > absDY * 2) {
+          // Clearly horizontal (at least 2× the vertical component) → lock
           axisLocked = true;
-        } else if (absDY > absDX * 1.5) {
-          return; // clearly vertical
         } else {
-          return; // ambiguous — wait
+          // Vertical, diagonal, or ambiguous → let Lenis handle page scroll
+          return;
         }
       }
       // ─────────────────────────────────────────────────────────────────────
 
-      // Block native scroll AND stop Lenis (document-level) from processing
-      // this same event — prevents vertical scroll bleed during horiz gesture
+      // Committed horizontal — block page scroll and Lenis simultaneously
       e.preventDefault();
       e.stopPropagation();
       clearTimeout(snapTimer);

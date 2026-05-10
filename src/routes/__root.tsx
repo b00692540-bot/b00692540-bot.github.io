@@ -79,11 +79,10 @@ function RootComponent() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const lenis = new Lenis({
-      duration: 1.2,
-      // Exponential ease-out: fast start, long natural deceleration tail
+      duration: 0.9,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      syncTouch: false, // keep native momentum on touch devices
+      syncTouch: false,
     });
 
     let rafId: number;
