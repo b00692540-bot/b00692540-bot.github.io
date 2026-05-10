@@ -259,16 +259,14 @@ function PressCarousel({ items }: { items: typeof press }) {
     if (!el || STRIDE === 0) return;
 
     let snapTimer: ReturnType<typeof setTimeout>;
-    let lastNonZeroDeltaX = 0; // sign of the LAST meaningful input — direction commitment
+    let lastNonZeroDeltaX = 0;
     let lastEventMs = 0;
+    let axisLocked = false; // true = horizontal gesture committed, vertical scroll blocked
 
     const doSnap = () => {
       const vi = -x.get() / STRIDE;
       const frac = vi - Math.floor(vi);
       let target: number;
-
-      // Commit to the direction of the last real movement.
-      // A tiny accidental drift (< 20% card) against the committed direction snaps back.
       if (lastNonZeroDeltaX > 0) {
         target = frac > 0.2 ? Math.floor(vi) + 1 : Math.floor(vi);
       } else if (lastNonZeroDeltaX < 0) {
@@ -276,34 +274,57 @@ function PressCarousel({ items }: { items: typeof press }) {
       } else {
         target = Math.round(vi);
       }
-
       lastNonZeroDeltaX = 0;
+      axisLocked = false; // release axis lock after snap
       snapToRef.current(target);
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 2.5) return;
-
       const now = Date.now();
-      if (now - lastEventMs > 400) lastNonZeroDeltaX = 0; // new gesture — reset direction
+      const isNewGesture = now - lastEventMs > 400;
+
+      if (isNewGesture) {
+        // Fresh gesture — reset all state before axis decision
+        axisLocked = false;
+        lastNonZeroDeltaX = 0;
+      }
       lastEventMs = now;
 
+      // ── AXIS LOCK ─────────────────────────────────────────────────────────
+      // On the first event of a new gesture, decide the axis once and hold it.
+      // After that, every event in this gesture is treated as horizontal —
+      // vertical scroll is fully suppressed until the gesture resets.
+      if (!axisLocked) {
+        const absDX = Math.abs(e.deltaX);
+        const absDY = Math.abs(e.deltaY);
+        if (absDX > 3 && absDX >= absDY) {
+          axisLocked = true;        // commit horizontal
+        } else if (absDY > absDX * 1.5) {
+          return;                   // clearly vertical — let page scroll normally
+        } else {
+          return;                   // ambiguous first event — wait for next one
+        }
+      }
+      // ──────────────────────────────────────────────────────────────────────
+
+      // Axis is horizontal-locked: block ALL vertical scroll for this gesture
+      e.preventDefault();
+      clearTimeout(snapTimer);
+
       const absDX = Math.abs(e.deltaX);
-      clearTimeout(snapTimer); // always reset — prevents firing while finger is present
 
       if (absDX < 3) {
-        if (absDX > 0) snapTimer = setTimeout(doSnap, 250);
-        return; // holding still — don't move x, don't preventDefault
+        // Finger slowing/holding — keep axis locked, push snap window back
+        snapTimer = setTimeout(doSnap, 250);
+        return;
       }
 
-      e.preventDefault();
-      lastNonZeroDeltaX = e.deltaX; // track direction of LAST real input
+      lastNonZeroDeltaX = e.deltaX;
 
       const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
 
-      // Short timers — Apple snaps almost immediately after finger lifts
       const delay = absDX > 40 ? 100 : 130;
       snapTimer = setTimeout(doSnap, delay);
     };
