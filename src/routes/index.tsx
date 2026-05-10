@@ -169,11 +169,37 @@ function PressCarousel({ items }: { items: typeof press }) {
 
   const x = useMotionValue(0);
 
+  // Refs so wheel handler always sees latest values without re-binding
+  const indexRef = useRef(index);
+  useEffect(() => { indexRef.current = index; }, [index]);
+
   const snapTo = (i: number) => {
     const clamped = Math.max(0, Math.min(items.length - 1, i));
     animate(x, -(clamped * STRIDE), { type: "spring", stiffness: 300, damping: 30 });
     setIndex(clamped);
   };
+  const snapToRef = useRef(snapTo);
+  useEffect(() => { snapToRef.current = snapTo; });
+
+  // Trackpad horizontal scroll → carousel navigation
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let accum = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 0.5) return;
+      e.preventDefault();
+      accum += e.deltaX;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (Math.abs(accum) > 20) snapToRef.current(accum > 0 ? indexRef.current + 1 : indexRef.current - 1);
+        accum = 0;
+      }, 80);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => { el.removeEventListener("wheel", onWheel); clearTimeout(timer); };
+  }, []);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     const { velocity, offset } = info;
@@ -231,6 +257,7 @@ function PressCarousel({ items }: { items: typeof press }) {
                     background: "#0a0a0a",
                   }}
                 >
+                  {/* Image fills the card */}
                   <img
                     src={p.img}
                     alt=""
@@ -245,47 +272,54 @@ function PressCarousel({ items }: { items: typeof press }) {
                       userSelect: "none",
                     }}
                   />
+                  {/* ↗ link indicator — white on dark image */}
                   <div
                     style={{
                       position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.06) 100%)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      padding: "clamp(18px, 3vw, 36px) clamp(20px, 3.5vw, 40px)",
+                      top: "clamp(14px, 2vw, 22px)",
+                      right: "clamp(16px, 2.5vw, 28px)",
+                      fontSize: 15,
+                      color: "rgba(255,255,255,0.6)",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 500,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.22em",
-                          color: "rgba(255,255,255,0.55)",
-                        }}
-                      >
-                        {p.tag}
-                      </span>
-                      <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>↗</span>
-                    </div>
+                    ↗
+                  </div>
+                  {/* Frosted-white bottom panel — black bold title on light background */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      background: "rgba(255,255,255,0.90)",
+                      backdropFilter: "blur(16px)",
+                      WebkitBackdropFilter: "blur(16px)",
+                      padding: "clamp(14px, 2vw, 22px) clamp(18px, 2.5vw, 32px) clamp(18px, 2.5vw, 28px)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 9,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.22em",
+                        color: "rgba(0,0,0,0.45)",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {p.tag}
+                    </span>
                     <div
                       style={{
                         fontFamily: '"Cormorant Garamond", Georgia, serif',
-                        fontSize: "clamp(16px, 1.8vw, 26px)",
-                        lineHeight: 1.35,
-                        color: "white",
+                        fontSize: "clamp(15px, 1.6vw, 22px)",
+                        fontWeight: 700,
+                        lineHeight: 1.3,
+                        color: "#000",
                       }}
                     >
-                      &ldquo;{p.title}&rdquo;
+                      {p.title}
                     </div>
                   </div>
                 </a>
@@ -324,13 +358,32 @@ function ParallaxImage({ src, alt }: { src: string; alt: string }) {
   }, []);
 
   return (
-    <div ref={wrapRef} className="relative h-[70vh] min-h-[400px] w-full overflow-hidden">
+    <div
+      ref={wrapRef}
+      style={{
+        position: "relative",
+        height: "70vh",
+        minHeight: 400,
+        width: "100%",
+        overflow: "hidden",
+      }}
+    >
       <div
         ref={imgRef}
-        className="absolute inset-0"
-        style={{ top: "-20%", bottom: "-20%", willChange: "transform" }}
+        style={{
+          position: "absolute",
+          top: "-20%",
+          bottom: "-20%",
+          left: 0,
+          right: 0,
+          willChange: "transform",
+        }}
       >
-        <img src={src} alt={alt} className="h-full w-full object-cover object-center" />
+        <img
+          src={src}
+          alt={alt}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
+        />
       </div>
     </div>
   );
