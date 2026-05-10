@@ -64,10 +64,9 @@ const certs = [
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
 ];
 
-function SectionLabel({ n, children, light }: { n: string; children: React.ReactNode; light?: boolean }) {
+function SectionLabel({ children, light }: { children: React.ReactNode; light?: boolean }) {
   return (
     <div className="mb-12 flex items-center gap-5">
-      <span className={`font-serif text-sm italic ${light ? "text-white/50" : "text-accent"}`}>{n}</span>
       <span className={`h-px flex-1 max-w-16 ${light ? "bg-white/20" : "bg-border"}`} />
       <span className={`eyebrow ${light ? "text-white/60" : ""}`}>{children}</span>
     </div>
@@ -209,17 +208,17 @@ function CarouselCard({
 
       {/* Title — top left, slides in from above */}
       <motion.div style={{ position: "absolute", top: pad, left: pad, right: pad, y: titleY, opacity: textOp }}>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(14px,1.5vw,20px)", fontWeight: 700, lineHeight: 1.25, color: tc, whiteSpace: "pre-line" }}>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(19px,1.9vw,25px)", fontWeight: 700, lineHeight: 1.25, color: tc, whiteSpace: "pre-line" }}>
           {p.title}
         </div>
       </motion.div>
 
       {/* Link arrow — top right */}
-      <div style={{ position: "absolute", top: pad, right: pad, fontSize: 13, color: p.lightText ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.40)" }}>↗</div>
+      <div style={{ position: "absolute", top: pad, right: pad, fontSize: 14, color: p.lightText ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.40)" }}>↗</div>
 
       {/* Body — bottom left, slides in from below */}
       <motion.div style={{ position: "absolute", bottom: pad, left: pad, right: pad, y: bodyY, opacity: textOp }}>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(13px,1.3vw,18px)", fontWeight: 500, lineHeight: 1.4, color: tc2, whiteSpace: "pre-line" }}>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(18px,1.6vw,23px)", fontWeight: 700, lineHeight: 1.4, color: tc2, whiteSpace: "pre-line" }}>
           {p.body}
         </div>
       </motion.div>
@@ -299,72 +298,92 @@ function PressCarousel({ items }: { items: typeof press }) {
     let snapTimer: ReturnType<typeof setTimeout>;
     let lastNonZeroDeltaX = 0;
     let lastEventMs = 0;
-    let axisLocked = false; // true = horizontal gesture committed, vertical scroll blocked
+    let axisLocked = false;
+    let lastVelocity = 0;  // px/s — used to choose snap threshold
+    let prevAbsDX = 0;     // detect deceleration (momentum ending)
 
     const doSnap = () => {
       const vi = -x.get() / STRIDE;
       const frac = vi - Math.floor(vi);
+      const dir = lastNonZeroDeltaX > 0 ? 1 : lastNonZeroDeltaX < 0 ? -1 : 0;
+      const speed = Math.abs(lastVelocity);
       let target: number;
-      if (lastNonZeroDeltaX > 0) {
-        target = frac > 0.2 ? Math.floor(vi) + 1 : Math.floor(vi);
-      } else if (lastNonZeroDeltaX < 0) {
-        target = frac < 0.8 ? Math.floor(vi) : Math.floor(vi) + 1;
+
+      if (speed > 400) {
+        // Fast flick — advance regardless of how little was moved
+        target = dir >= 0 ? Math.floor(vi) + 1 : Math.floor(vi);
+      } else if (speed > 60) {
+        // Gentle slide — 35% threshold (Apple measured ~35-40%)
+        target = dir > 0
+          ? (frac > 0.35 ? Math.floor(vi) + 1 : Math.floor(vi))
+          : (frac < 0.65 ? Math.floor(vi) : Math.floor(vi) + 1);
       } else {
-        target = Math.round(vi);
+        // Slow deliberate drag — standard 50% midpoint
+        target = dir > 0
+          ? (frac > 0.50 ? Math.floor(vi) + 1 : Math.floor(vi))
+          : (frac < 0.50 ? Math.floor(vi) : Math.floor(vi) + 1);
       }
+
       lastNonZeroDeltaX = 0;
-      axisLocked = false; // release axis lock after snap
+      lastVelocity = 0;
+      prevAbsDX = 0;
+      axisLocked = false;
       snapToRef.current(target);
     };
 
     const onWheel = (e: WheelEvent) => {
       const now = Date.now();
-      const isNewGesture = now - lastEventMs > 400;
+      const dt = Math.max(1, now - lastEventMs);
+      const isNewGesture = dt > 400;
 
       if (isNewGesture) {
-        // Fresh gesture — reset all state before axis decision
         axisLocked = false;
         lastNonZeroDeltaX = 0;
+        lastVelocity = 0;
+        prevAbsDX = 0;
       }
       lastEventMs = now;
 
-      // ── AXIS LOCK ─────────────────────────────────────────────────────────
-      // Decide horizontal vs vertical once on the first real event of a gesture.
-      // Any horizontal component > 5px locks the axis and suppresses vertical
-      // for the rest of the gesture — mirrors Apple's single-axis commitment.
+      // ── AXIS LOCK — commit once, hold for entire gesture ──────────────────
       if (!axisLocked) {
         const absDX = Math.abs(e.deltaX);
         const absDY = Math.abs(e.deltaY);
         if (absDX > 5) {
-          axisLocked = true;   // any clear horizontal intent → lock
+          axisLocked = true;
         } else if (absDY > absDX * 1.5) {
-          return;              // clearly vertical → let page scroll
+          return; // clearly vertical
         } else {
-          return;              // too small to decide — wait for next event
+          return; // ambiguous — wait
         }
       }
-      // ──────────────────────────────────────────────────────────────────────
+      // ─────────────────────────────────────────────────────────────────────
 
-      // Horizontal axis locked — unconditionally block vertical scroll
       e.preventDefault();
       clearTimeout(snapTimer);
 
       const absDX = Math.abs(e.deltaX);
 
-      if (absDX < 3) {
-        // Finger slowing / holding — axis stays locked, push snap back
-        snapTimer = setTimeout(doSnap, 200);
-        return;
+      // Track instantaneous velocity (px/s) for threshold decisions
+      if (absDX > 2) {
+        lastVelocity = (e.deltaX / dt) * 1000;
+        lastNonZeroDeltaX = e.deltaX;
       }
 
-      lastNonZeroDeltaX = e.deltaX;
+      // Detect momentum end: deltaX rapidly decreasing → fire snap immediately
+      const isDecelerating = absDX < prevAbsDX * 0.6 && absDX < 15;
+      prevAbsDX = absDX;
+
+      if (absDX < 3) {
+        snapTimer = setTimeout(doSnap, isDecelerating ? 30 : 180);
+        return;
+      }
 
       const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
 
-      // Snap almost immediately after finger lifts — matches Apple timing
-      const delay = absDX > 40 ? 80 : 110;
+      // Fire fast — momentum end detection will catch the exact lift point
+      const delay = isDecelerating ? 30 : absDX > 40 ? 60 : 90;
       snapTimer = setTimeout(doSnap, delay);
     };
 
@@ -552,7 +571,7 @@ function Index() {
         <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
           <div className="mb-16 lg:col-span-7 lg:mb-0">
             <Reveal>
-              <SectionLabel n="02">About</SectionLabel>
+              <SectionLabel>About</SectionLabel>
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
@@ -598,7 +617,7 @@ function Index() {
         <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <Reveal>
-              <SectionLabel n="03">Education</SectionLabel>
+              <SectionLabel>Education</SectionLabel>
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
@@ -638,24 +657,12 @@ function Index() {
         {/* Header */}
         <div className="mx-auto max-w-[1200px] px-6 md:px-12 mb-12">
           <Reveal>
-            <SectionLabel n="04" light>Press &amp; Features</SectionLabel>
+            <SectionLabel light>Press &amp; Features</SectionLabel>
           </Reveal>
           <Reveal delay={120}>
             <h2 className="display" style={{ fontSize: "clamp(36px, 4vw, 56px)", color: "white" }}>
               Featured in.
             </h2>
-          </Reveal>
-          <Reveal delay={240}>
-            <a
-              href="https://linkedin.com/in/christopher-biguet"
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "white", borderBottomColor: "rgba(255,255,255,0.5)" }}
-              className="inline-flex items-center gap-3 border-b pb-2 text-[12px] font-medium uppercase tracking-[0.22em] transition-all duration-300 hover:gap-5 mt-4"
-            >
-              See more on LinkedIn
-              <span aria-hidden>→</span>
-            </a>
           </Reveal>
         </div>
 
@@ -669,7 +676,6 @@ function Index() {
         <div className="mx-auto max-w-[1200px] text-center">
           <Reveal>
             <div className="mb-12 flex items-center justify-center gap-5">
-              <span className="font-serif text-sm italic text-accent">05</span>
               <span className="h-px w-16 bg-border" />
               <span className="eyebrow">Credentials</span>
               <span className="h-px w-16 bg-border" />
@@ -685,8 +691,15 @@ function Index() {
               <Reveal key={c.name} delay={i * 60}>
                 <div
                   onClick={() => c.img && setActivePdf(c.img)}
-                  className={`group border border-border p-6 text-left transition-all duration-300 ${c.img ? "cursor-pointer hover:border-accent hover:shadow-md" : ""}`}
+                  className={`group relative border border-border p-6 text-left transition-all duration-300 ${c.img ? "cursor-pointer hover:border-accent hover:shadow-md" : ""}`}
                 >
+                  {/* + badge — invites click to enlarge */}
+                  {c.img && (
+                    <div className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-foreground text-background text-sm font-light leading-none select-none">
+                      +
+                    </div>
+                  )}
+
                   <div className="font-serif text-lg text-foreground transition-colors duration-300 group-hover:text-accent">
                     {c.name}
                   </div>
@@ -703,9 +716,6 @@ function Index() {
                           alt={c.name}
                           className="w-full object-contain object-top opacity-90 group-hover:opacity-100 transition-opacity duration-300"
                         />
-                        <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-accent">
-                          Click to view full ↗
-                        </p>
                       </div>
                     </div>
                   )}
@@ -756,7 +766,6 @@ function Index() {
         <div className="mx-auto max-w-[1200px] text-center">
           <Reveal>
             <div className="mb-12 flex items-center justify-center gap-5">
-              <span className="font-serif text-sm italic text-accent">06</span>
               <span className="h-px w-16 bg-border" />
               <span className="eyebrow">Contact</span>
               <span className="h-px w-16 bg-border" />
