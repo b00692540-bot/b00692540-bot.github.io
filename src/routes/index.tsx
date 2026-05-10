@@ -235,9 +235,9 @@ function PressCarousel({ items }: { items: typeof press }) {
     vIndexRef.current = targetVI;
     animate(x, -(targetVI * STRIDE), {
       type: "spring",
-      stiffness: 110,
-      damping: 20,
-      mass: 1.0,
+      stiffness: 280,
+      damping: 30,
+      mass: 0.8,
       onComplete: () => {
         // After landing, silently reset to middle copy so loop never runs out of track
         let adj = targetVI;
@@ -253,62 +253,58 @@ function PressCarousel({ items }: { items: typeof press }) {
   const snapToRef = useRef(snapTo);
   useEffect(() => { snapToRef.current = snapTo; });
 
-  // Direct trackpad follow with gesture-aware snap
+  // Direct trackpad follow — x tracks finger instantly, snaps immediately on lift
   useEffect(() => {
     const el = containerRef.current;
     if (!el || STRIDE === 0) return;
 
     let snapTimer: ReturnType<typeof setTimeout>;
-    let totalDeltaX = 0;   // net accumulated delta for the whole gesture
-    let lastEventMs = 0;   // to detect a new gesture (gap > 400ms resets accumulator)
+    let lastNonZeroDeltaX = 0; // sign of the LAST meaningful input — direction commitment
+    let lastEventMs = 0;
 
     const doSnap = () => {
       const vi = -x.get() / STRIDE;
       const frac = vi - Math.floor(vi);
       let target: number;
 
-      if (Math.abs(totalDeltaX) > 30) {
-        // Clear net direction — commit to it regardless of exact position
-        target = totalDeltaX > 0 ? Math.floor(vi) + 1 : Math.floor(vi);
-      } else if (frac > 0.55) {
-        target = Math.ceil(vi);   // past midpoint → advance
+      // Commit to the direction of the last real movement.
+      // A tiny accidental drift (< 20% card) against the committed direction snaps back.
+      if (lastNonZeroDeltaX > 0) {
+        target = frac > 0.2 ? Math.floor(vi) + 1 : Math.floor(vi);
+      } else if (lastNonZeroDeltaX < 0) {
+        target = frac < 0.8 ? Math.floor(vi) : Math.floor(vi) + 1;
       } else {
-        target = Math.floor(vi);  // before midpoint → stay
+        target = Math.round(vi);
       }
 
-      totalDeltaX = 0;
+      lastNonZeroDeltaX = 0;
       snapToRef.current(target);
     };
 
     const onWheel = (e: WheelEvent) => {
-      // Reject clearly-vertical scrolls; allow diagonal swipes that lean horizontal
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 2.5) return;
 
       const now = Date.now();
-      if (now - lastEventMs > 400) totalDeltaX = 0; // new gesture — reset accumulator
+      if (now - lastEventMs > 400) lastNonZeroDeltaX = 0; // new gesture — reset direction
       lastEventMs = now;
 
       const absDX = Math.abs(e.deltaX);
-
-      // ── CRITICAL FIX: always clear the snap timer, even for tiny/slow events.
-      // This keeps the snap from firing while the user's finger is still present.
-      clearTimeout(snapTimer);
+      clearTimeout(snapTimer); // always reset — prevents firing while finger is present
 
       if (absDX < 3) {
-        // Finger barely moving / holding — push the snap window back without moving x
-        if (absDX > 0) snapTimer = setTimeout(doSnap, 450);
-        return;
+        if (absDX > 0) snapTimer = setTimeout(doSnap, 250);
+        return; // holding still — don't move x, don't preventDefault
       }
 
       e.preventDefault();
-      totalDeltaX += e.deltaX;
+      lastNonZeroDeltaX = e.deltaX; // track direction of LAST real input
 
       const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
 
-      // Fast flick → 200ms; deliberate drag → 300ms (matches Apple's patience)
-      const delay = absDX > 40 ? 200 : 300;
+      // Short timers — Apple snaps almost immediately after finger lifts
+      const delay = absDX > 40 ? 100 : 130;
       snapTimer = setTimeout(doSnap, delay);
     };
 
