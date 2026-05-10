@@ -62,6 +62,7 @@ const certs = [
   { name: "Sales & Marketing", issuer: "AHLEI", img: "/Sales_Certification.jpg" },
   { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", img: "/STR_Certification.jpg" },
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
+  { name: "Sales Software", issuer: "HubSpot", img: "/Hubspot_SalesSoftware_Certification .png" },
 ];
 
 function SectionLabel({ children, light }: { children: React.ReactNode; light?: boolean }) {
