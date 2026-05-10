@@ -181,9 +181,9 @@ function PressCarousel({ items }: { items: typeof press }) {
     vIndexRef.current = targetVI;
     animate(x, -(targetVI * STRIDE), {
       type: "spring",
-      stiffness: 160,
-      damping: 24,
-      mass: 0.9,
+      stiffness: 110,
+      damping: 20,
+      mass: 1.0,
       onComplete: () => {
         // After landing, silently reset to middle copy so loop never runs out of track
         let adj = targetVI;
@@ -199,32 +199,65 @@ function PressCarousel({ items }: { items: typeof press }) {
   const snapToRef = useRef(snapTo);
   useEffect(() => { snapToRef.current = snapTo; });
 
-  // Direct trackpad follow: x tracks deltaX instantly, snap fires after gesture ends
+  // Direct trackpad follow with gesture-aware snap
   useEffect(() => {
     const el = containerRef.current;
     if (!el || STRIDE === 0) return;
+
     let snapTimer: ReturnType<typeof setTimeout>;
-    let lastDeltaX = 0;
+    let totalDeltaX = 0;   // net accumulated delta for the whole gesture
+    let lastEventMs = 0;   // to detect a new gesture (gap > 400ms resets accumulator)
+
+    const doSnap = () => {
+      const vi = -x.get() / STRIDE;
+      const frac = vi - Math.floor(vi);
+      let target: number;
+
+      if (Math.abs(totalDeltaX) > 30) {
+        // Clear net direction — commit to it regardless of exact position
+        target = totalDeltaX > 0 ? Math.floor(vi) + 1 : Math.floor(vi);
+      } else if (frac > 0.55) {
+        target = Math.ceil(vi);   // past midpoint → advance
+      } else {
+        target = Math.floor(vi);  // before midpoint → stay
+      }
+
+      totalDeltaX = 0;
+      snapToRef.current(target);
+    };
+
     const onWheel = (e: WheelEvent) => {
-      // Ignore tiny inputs and clearly-vertical scrolls (but allow diagonal-dominant-horizontal)
-      if (Math.abs(e.deltaX) < 3 || Math.abs(e.deltaY) > Math.abs(e.deltaX) * 2.5) return;
+      // Reject clearly-vertical scrolls; allow diagonal swipes that lean horizontal
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) * 2.5) return;
+
+      const now = Date.now();
+      if (now - lastEventMs > 400) totalDeltaX = 0; // new gesture — reset accumulator
+      lastEventMs = now;
+
+      const absDX = Math.abs(e.deltaX);
+
+      // ── CRITICAL FIX: always clear the snap timer, even for tiny/slow events.
+      // This keeps the snap from firing while the user's finger is still present.
+      clearTimeout(snapTimer);
+
+      if (absDX < 3) {
+        // Finger barely moving / holding: prevent default snap for a generous window
+        if (absDX > 0) snapTimer = setTimeout(doSnap, 350);
+        return; // don't preventDefault or move x — let page scroll breathe
+      }
+
       e.preventDefault();
-      lastDeltaX = e.deltaX;
-      // Soft rubber-band: ±1 card beyond middle copy
+      totalDeltaX += e.deltaX;
+
       const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
-      clearTimeout(snapTimer);
-      snapTimer = setTimeout(() => {
-        const vi = -x.get() / STRIDE;
-        // Velocity bias: if gesture was still moving strongly, commit to that direction
-        let target = Math.round(vi);
-        if (Math.abs(lastDeltaX) > 10) {
-          target = lastDeltaX > 0 ? Math.floor(vi) + 1 : Math.ceil(vi) - 1;
-        }
-        snapToRef.current(target);
-      }, 150);
+
+      // Adaptive delay: fast flick → snap quickly; slow deliberate drag → more patience
+      const delay = absDX > 30 ? 110 : 200;
+      snapTimer = setTimeout(doSnap, delay);
     };
+
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => { el.removeEventListener("wheel", onWheel); clearTimeout(snapTimer); };
   }, [STRIDE, N, LOOP_OFFSET, x]);
