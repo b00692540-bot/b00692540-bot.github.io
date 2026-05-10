@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
-import { Marquee } from "@/components/editorial/Marquee";
 import { Reveal } from "@/components/editorial/Reveal";
 
 export const Route = createFileRoute("/")({
@@ -88,11 +87,7 @@ function PressCarousel({ items }: { items: typeof press }) {
         const imgEl = card.querySelector<HTMLElement>(".press-img");
         if (imgEl) {
           const offset = (cardCenter - cx) / cw;
-          if (card.classList.contains("un-press-card")) {
-            imgEl.style.transform = `translateX(${offset * -22}px)`;
-          } else {
-            imgEl.style.transform = `scale(1.1) translateX(${offset * -22}px)`;
-          }
+          imgEl.style.transform = `translateX(${offset * -22}px)`;
         }
 
         const textEl = card.querySelector<HTMLElement>(".press-text");
@@ -143,94 +138,85 @@ function PressCarousel({ items }: { items: typeof press }) {
         paddingRight: "max(24px, 6vw)",
       }}
     >
-      {items.map((p, i) => {
-        const isUN = i === 0;
-        return (
-          <a
-            key={p.href}
-            ref={(el) => {
-              cardRefs.current[i] = el;
-              if (isUN) unRevealRef.current = el;
-            }}
-            href={p.href}
-            target="_blank"
-            rel="noreferrer"
-            className={`group relative flex-none snap-center overflow-hidden${isUN ? " un-press-card" : ""}`}
-            style={{
-              width: isUN ? "clamp(200px, 42vw, 340px)" : "clamp(280px, 76vw, 620px)",
-              aspectRatio: isUN ? "3 / 4" : "1 / 1",
-              willChange: "transform, opacity",
-            }}
-          >
-            {isUN ? (
-              <div className="press-img absolute inset-0 overflow-hidden" style={{ willChange: "transform" }}>
-                <img
-                  src={p.img}
-                  alt=""
-                  className="un-press-img h-full w-full object-cover"
-                  style={{ willChange: "transform" }}
-                />
-              </div>
-            ) : (
-              <img
-                src={p.img}
-                alt=""
-                className="press-img absolute inset-0 h-full w-full object-cover"
-                style={{ willChange: "transform" }}
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-            <div
-              className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
+      {items.map((p, i) => (
+        <a
+          key={p.href}
+          ref={(el) => {
+            cardRefs.current[i] = el;
+            if (i === 0) unRevealRef.current = el;
+          }}
+          href={p.href}
+          target="_blank"
+          rel="noreferrer"
+          className="group relative flex-none snap-center overflow-hidden"
+          style={{
+            width: "clamp(200px, 42vw, 340px)",
+            aspectRatio: "3 / 4",
+            willChange: "transform, opacity",
+          }}
+        >
+          <div className="press-img absolute inset-0 overflow-hidden" style={{ willChange: "transform" }}>
+            <img
+              src={p.img}
+              alt=""
+              className="h-full w-full object-cover"
               style={{ willChange: "transform" }}
-            >
-              <div className="flex items-start justify-between">
-                <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
-                  {p.tag}
-                </span>
-                <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  ↗
-                </span>
-              </div>
-              <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
-                &ldquo;{p.title}&rdquo;
-              </div>
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+          <div
+            className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
+            style={{ willChange: "transform" }}
+          >
+            <div className="flex items-start justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
+                {p.tag}
+              </span>
+              <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                ↗
+              </span>
             </div>
-          </a>
-        );
-      })}
+            <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
+              &ldquo;{p.title}&rdquo;
+            </div>
+          </div>
+        </a>
+      ))}
     </div>
   );
 }
 
-function ActionShotVideo() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
+function ParallaxImage({ src, alt }: { src: string; alt: string }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
 
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !muted;
-      setMuted(!muted);
-    }
-  };
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const img = imgRef.current;
+    if (!wrap || !img) return;
+
+    const update = () => {
+      const rect = wrap.getBoundingClientRect();
+      const viewH = window.innerHeight;
+      const progress = (viewH - rect.top) / (viewH + rect.height);
+      const offset = (progress - 0.5) * 120;
+      img.style.transform = `translateY(${offset}px)`;
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   return (
-    <div className="relative mt-8 overflow-hidden rounded-sm border border-border w-full max-w-xs">
-      <video
-        ref={videoRef}
-        src="/Future_Content/Action_Shot_Chris.mp4"
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-full object-cover"
-      />
-      <button
-        onClick={toggleMute}
-        className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-sm bg-black/60 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-white backdrop-blur-sm transition-colors hover:bg-black/80"
+    <div ref={wrapRef} className="relative h-[70vh] min-h-[400px] w-full overflow-hidden">
+      <div
+        ref={imgRef}
+        className="absolute inset-0"
+        style={{ top: "-20%", bottom: "-20%", willChange: "transform" }}
       >
-        {muted ? "🔇 Unmute" : "🔊 Mute"}
-      </button>
+        <img src={src} alt={alt} className="h-full w-full object-cover object-center" />
+      </div>
     </div>
   );
 }
@@ -294,7 +280,8 @@ function Index() {
         </div>
       </section>
 
-      <Marquee />
+      {/* Singapore Marina — parallax */}
+      <ParallaxImage src="/Singapore_Marina.jpg" alt="Singapore Marina Bay" />
 
       {/* About */}
       <section id="about" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
@@ -412,12 +399,6 @@ function Index() {
         {/* Horizontal scroll carousel */}
         <PressCarousel items={press} />
 
-        {/* Footer */}
-        <div className="mx-auto max-w-[1200px] px-6 md:px-12 mt-10">
-          <Reveal delay={160}>
-            <ActionShotVideo />
-          </Reveal>
-        </div>
       </section>
 
       {/* Certifications */}
