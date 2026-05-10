@@ -101,21 +101,13 @@ function DotPill({
     return 0.3 + 0.7 * t;
   });
   return (
-    <motion.button
+    <button
       onClick={onClick}
       aria-label={`Go to press card ${i + 1}`}
-      style={{
-        width,
-        height: 8,
-        borderRadius: 4,
-        background: "rgba(255,255,255,0.92)",
-        opacity,
-        border: "none",
-        cursor: "pointer",
-        padding: 0,
-        flexShrink: 0,
-      }}
-    />
+      style={{ background: "none", border: "none", cursor: "pointer", padding: "18px 4px", flexShrink: 0, display: "flex", alignItems: "center" }}
+    >
+      <motion.span style={{ width, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.92)", opacity, display: "block", flexShrink: 0 }} />
+    </button>
   );
 }
 
@@ -500,6 +492,7 @@ function ParallaxImage({ src, alt }: { src: string; alt: string }) {
         <img
           src={src}
           alt={alt}
+          loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
         />
       </div>
@@ -522,6 +515,16 @@ function Index() {
 
       {/* Hero */}
       <section className="relative flex min-h-[90vh] flex-col justify-end overflow-hidden px-6 pb-20 pt-40 md:px-12 md:pb-28 md:pt-52">
+        {/* Hero photo — mobile: full background with bottom gradient */}
+        <div className="pointer-events-none absolute inset-0 lg:hidden">
+          <img
+            src="/Christopher_hero.jpg"
+            alt=""
+            className="h-full w-full object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/50 to-background" />
+        </div>
+
         {/* Hero photo — right side, desktop only */}
         <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[45%] lg:block">
           <img
@@ -550,14 +553,14 @@ function Index() {
             <div className="mt-12 flex flex-wrap items-center gap-8">
               <a
                 href="#about"
-                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
               >
                 Explore
                 <span aria-hidden>↓</span>
               </a>
               <a
                 href="#contact"
-                className="text-[12px] font-medium uppercase tracking-[0.22em] text-muted-foreground transition-colors duration-300 hover:text-foreground"
+                className="inline-flex items-center gap-3 border-b border-foreground/50 pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:border-accent hover:text-accent"
               >
                 Get in touch
               </a>
@@ -593,7 +596,7 @@ function Index() {
                 href="/SG_Christopher_BIGUET_CV_Manager.pdf"
                 target="_blank"
                 rel="noreferrer"
-                className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
               >
                 Download CV
                 <span aria-hidden>↓</span>
@@ -646,6 +649,7 @@ function Index() {
                 <img
                   src="/Christopher_profile_1.jpeg"
                   alt="Christopher Biguet"
+                  loading="lazy"
                   className="h-full w-full object-cover object-top"
                   style={{ maxHeight: "520px" }}
                 />
@@ -656,7 +660,7 @@ function Index() {
       </section>
 
       {/* Press */}
-      <section id="featured" style={{ background: "#000", paddingTop: "5rem", paddingBottom: "5rem", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <section id="featured" style={{ background: "linear-gradient(to bottom, var(--background) 0%, #000 72px)", paddingTop: "5rem", paddingBottom: "5rem", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
         {/* Header */}
         <div className="mx-auto max-w-[1200px] px-6 md:px-12 mb-12">
           <Reveal>
@@ -759,6 +763,7 @@ function Index() {
         <img
           src="/Group_Regis.jpeg"
           alt="The St. Regis"
+          loading="lazy"
           className="h-full w-full object-cover object-center"
         />
         <div className="absolute inset-0 bg-foreground/20" />
@@ -790,7 +795,7 @@ function Index() {
                 href="https://linkedin.com/in/christopher-biguet"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                className="inline-flex items-center gap-3 rounded-sm bg-foreground px-6 py-3 text-[12px] font-medium uppercase tracking-[0.18em] text-background transition-all duration-300 hover:bg-accent"
               >
                 Connect on LinkedIn
                 <span aria-hidden>→</span>
@@ -801,7 +806,7 @@ function Index() {
                 href="/SG_Christopher_BIGUET_CV_Manager.pdf"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                className="inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
               >
                 Download CV
                 <span aria-hidden>↓</span>
@@ -810,6 +815,25 @@ function Index() {
           </div>
         </div>
       </section>
+      {/* Footer */}
+      <footer className="border-t border-border px-6 py-8 md:px-12">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+          <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            © {new Date().getFullYear()} Christopher Biguet
+          </span>
+          <div className="flex items-center gap-6 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            <a href="mailto:biguet.chris@gmail.com" className="transition-colors duration-200 hover:text-foreground">
+              Email
+            </a>
+            <a href="https://linkedin.com/in/christopher-biguet" target="_blank" rel="noreferrer" className="transition-colors duration-200 hover:text-foreground">
+              LinkedIn
+            </a>
+            <a href="#top" className="transition-colors duration-200 hover:text-foreground">
+              ↑ Top
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

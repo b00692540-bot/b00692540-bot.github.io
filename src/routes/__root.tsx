@@ -100,6 +100,26 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": "Christopher Biguet",
+          "jobTitle": "Senior Commercial Manager",
+          "url": "https://christopherbiguet.com",
+          "sameAs": ["https://linkedin.com/in/christopher-biguet"],
+          "email": "biguet.chris@gmail.com",
+          "knowsAbout": [
+            "Business Development", "Commercial Strategy",
+            "Digital Transformation", "Luxury Hospitality", "MBA"
+          ],
+          "alumniOf": [
+            { "@type": "CollegeOrUniversity", "name": "ESSEC Business School" },
+            { "@type": "CollegeOrUniversity", "name": "École de Savignac" }
+          ]
+        }) }}
+      />
       <Outlet />
     </QueryClientProvider>
   );
