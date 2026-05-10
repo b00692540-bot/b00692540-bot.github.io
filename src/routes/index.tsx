@@ -359,7 +359,10 @@ function PressCarousel({ items }: { items: typeof press }) {
       }
       // ─────────────────────────────────────────────────────────────────────
 
+      // Block native scroll AND stop Lenis (document-level) from processing
+      // this same event — prevents vertical scroll bleed during horiz gesture
       e.preventDefault();
+      e.stopPropagation();
       clearTimeout(snapTimer);
 
       const absDX = Math.abs(e.deltaX);
