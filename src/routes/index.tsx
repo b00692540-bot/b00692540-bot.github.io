@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Reveal } from "@/components/editorial/Reveal";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import type { PanInfo, MotionValue } from "framer-motion";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -48,140 +50,253 @@ const certs = [
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
 ];
 
-function SectionLabel({ n, children }: { n: string; children: React.ReactNode }) {
+function SectionLabel({ n, children, light }: { n: string; children: React.ReactNode; light?: boolean }) {
   return (
     <div className="mb-12 flex items-center gap-5">
-      <span className="font-serif text-sm italic text-accent">{n}</span>
-      <span className="h-px flex-1 max-w-16 bg-border" />
-      <span className="eyebrow">{children}</span>
+      <span className={`font-serif text-sm italic ${light ? "text-white/50" : "text-accent"}`}>{n}</span>
+      <span className={`h-px flex-1 max-w-16 ${light ? "bg-white/20" : "bg-border"}`} />
+      <span className={`eyebrow ${light ? "text-white/60" : ""}`}>{children}</span>
+    </div>
+  );
+}
+
+const DOT = 8;
+const DOT_GAP = 6;
+const DOT_STRIDE = DOT + DOT_GAP;
+
+function LiquidPill({
+  count,
+  progress,
+  onDotClick,
+}: {
+  count: number;
+  progress: MotionValue<number>;
+  onDotClick: (i: number) => void;
+}) {
+  const totalWidth = count * DOT + (count - 1) * DOT_GAP;
+
+  // Trailing edge uses ease-in (t²) so the pill stretches forward then snaps — the liquid feel
+  const pillLeft = useTransform(progress, (p) => {
+    const clamped = Math.max(0, Math.min(count - 1, p));
+    const f = Math.floor(clamped);
+    const t = clamped - f;
+    return (f + t * t) * DOT_STRIDE;
+  });
+
+  // Width bell-curves via sin so it peaks at the midpoint between two dots
+  const pillWidth = useTransform(progress, (p) => {
+    const clamped = Math.max(0, Math.min(count - 1, p));
+    const t = clamped - Math.floor(clamped);
+    return DOT + Math.sin(t * Math.PI) * DOT_STRIDE;
+  });
+
+  return (
+    <div style={{ display: "flex", justifyContent: "center", marginTop: 28, paddingBottom: 4 }}>
+      <div
+        style={{
+          background: "rgba(255,255,255,0.07)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderRadius: 24,
+          padding: "10px 16px",
+          border: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <div style={{ position: "relative", width: totalWidth, height: DOT }}>
+          {Array.from({ length: count }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => onDotClick(i)}
+              aria-label={`Go to press card ${i + 1}`}
+              style={{
+                position: "absolute",
+                left: i * DOT_STRIDE,
+                top: 0,
+                width: DOT,
+                height: DOT,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.22)",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+              }}
+            />
+          ))}
+          <motion.div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: pillLeft,
+              width: pillWidth,
+              height: DOT,
+              borderRadius: DOT / 2,
+              background: "rgba(255,255,255,0.92)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
 function PressCarousel({ items }: { items: typeof press }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const unRevealRef = useRef<HTMLAnchorElement | null>(null);
+  const [index, setIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    let rafId: number;
-
-    const update = () => {
-      const cw = el.clientWidth;
-      const cx = el.scrollLeft + cw / 2;
-
-      cardRefs.current.forEach((card) => {
-        if (!card) return;
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-        const dist = Math.abs(cx - cardCenter);
-        const maxDist = card.offsetWidth;
-        const ratio = Math.max(0, 1 - dist / maxDist);
-        const scale = 0.88 + 0.12 * ratio;
-
-        card.style.transform = `scale(${scale})`;
-        card.style.opacity = String(0.65 + 0.35 * ratio);
-
-        const imgEl = card.querySelector<HTMLElement>(".press-img");
-        if (imgEl) {
-          const offset = (cardCenter - cx) / cw;
-          imgEl.style.transform = `translateX(${offset * -22}px)`;
-        }
-
-        const textEl = card.querySelector<HTMLElement>(".press-text");
-        if (textEl) {
-          const offset = (cardCenter - cx) / cw;
-          textEl.style.transform = `translateX(${offset * 18}px)`;
-        }
-      });
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(update);
-    };
-
-    el.addEventListener("scroll", onScroll, { passive: true });
-    requestAnimationFrame(update);
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafId);
-    };
+  useLayoutEffect(() => {
+    if (containerRef.current) setContainerWidth(containerRef.current.clientWidth);
   }, []);
 
   useEffect(() => {
-    const carousel = scrollRef.current;
-    const card = unRevealRef.current;
-    if (!carousel || !card) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          card.classList.add("is-revealed");
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(carousel);
-    return () => observer.disconnect();
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver((entries) => setContainerWidth(entries[0].contentRect.width));
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
   }, []);
+
+  const MAX_CARD = 900;
+  const cardWidth =
+    containerWidth > 0
+      ? Math.min(MAX_CARD, containerWidth - 2 * Math.max(24, containerWidth * 0.07))
+      : 0;
+  const PEEK = containerWidth > 0 ? (containerWidth - cardWidth) / 2 : 0;
+  const GAP = 12;
+  const STRIDE = cardWidth + GAP;
+  const cardHeight = Math.round(cardWidth * (10 / 16));
+
+  const x = useMotionValue(0);
+
+  const snapTo = (i: number) => {
+    const clamped = Math.max(0, Math.min(items.length - 1, i));
+    animate(x, -(clamped * STRIDE), { type: "spring", stiffness: 300, damping: 30 });
+    setIndex(clamped);
+  };
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    const { velocity, offset } = info;
+    let newIndex = index;
+    if (Math.abs(velocity.x) > 250 || Math.abs(offset.x) > STRIDE * 0.25) {
+      newIndex = velocity.x < 0 || offset.x < 0 ? index + 1 : index - 1;
+    }
+    snapTo(newIndex);
+  };
+
+  const progress = useTransform(x, (val) =>
+    STRIDE === 0 ? 0 : Math.max(0, Math.min(items.length - 1, -val / STRIDE))
+  );
 
   return (
-    <div
-      ref={scrollRef}
-      className="press-carousel flex gap-3 md:gap-4 overflow-x-scroll snap-x snap-mandatory py-6"
-      style={{
-        scrollbarWidth: "none",
-        paddingLeft: "max(24px, 6vw)",
-        paddingRight: "max(24px, 6vw)",
-      }}
-    >
-      {items.map((p, i) => (
-        <a
-          key={p.href}
-          ref={(el) => {
-            cardRefs.current[i] = el;
-            if (i === 0) unRevealRef.current = el;
-          }}
-          href={p.href}
-          target="_blank"
-          rel="noreferrer"
-          className="group relative flex-none snap-center overflow-hidden"
-          style={{
-            width: "clamp(200px, 42vw, 340px)",
-            aspectRatio: "3 / 4",
-            willChange: "transform, opacity",
-          }}
-        >
-          <div className="press-img absolute inset-0 overflow-hidden" style={{ willChange: "transform" }}>
-            <img
-              src={p.img}
-              alt=""
-              className="h-full w-full object-cover"
-              style={{ willChange: "transform" }}
-            />
+    <div ref={containerRef} style={{ width: "100%" }}>
+      {containerWidth > 0 && (
+        <>
+          {/* Track */}
+          <div style={{ overflow: "hidden", position: "relative", height: cardHeight }}>
+            <motion.div
+              drag="x"
+              dragConstraints={{ left: -(items.length - 1) * STRIDE, right: 0 }}
+              dragElastic={0.08}
+              style={{
+                x,
+                position: "absolute",
+                left: PEEK,
+                top: 0,
+                display: "flex",
+                gap: GAP,
+                cursor: dragging ? "grabbing" : "grab",
+              }}
+              onDragStart={() => setDragging(true)}
+              onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
+            >
+              {items.map((p) => (
+                <a
+                  key={p.href}
+                  href={dragging ? undefined : p.href}
+                  onClick={(e) => { if (dragging) e.preventDefault(); }}
+                  target="_blank"
+                  rel="noreferrer"
+                  draggable={false}
+                  style={{
+                    flexShrink: 0,
+                    width: cardWidth,
+                    height: cardHeight,
+                    position: "relative",
+                    overflow: "hidden",
+                    borderRadius: 20,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    display: "block",
+                    userSelect: "none",
+                    background: "#0a0a0a",
+                  }}
+                >
+                  <img
+                    src={p.img}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 45%, rgba(0,0,0,0.06) 100%)",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      padding: "clamp(18px, 3vw, 36px) clamp(20px, 3.5vw, 40px)",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 500,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.22em",
+                          color: "rgba(255,255,255,0.55)",
+                        }}
+                      >
+                        {p.tag}
+                      </span>
+                      <span style={{ fontSize: 14, color: "rgba(255,255,255,0.4)" }}>↗</span>
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: '"Cormorant Garamond", Georgia, serif',
+                        fontSize: "clamp(16px, 1.8vw, 26px)",
+                        lineHeight: 1.35,
+                        color: "white",
+                      }}
+                    >
+                      &ldquo;{p.title}&rdquo;
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </motion.div>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-          <div
-            className="press-text absolute inset-0 flex flex-col justify-between p-7 md:p-10"
-            style={{ willChange: "transform" }}
-          >
-            <div className="flex items-start justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-white/60">
-                {p.tag}
-              </span>
-              <span className="text-sm text-white/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                ↗
-              </span>
-            </div>
-            <div className="font-serif text-2xl leading-snug text-white md:text-[1.85rem]">
-              &ldquo;{p.title}&rdquo;
-            </div>
-          </div>
-        </a>
-      ))}
+
+          {/* Liquid pill pagination */}
+          <LiquidPill count={items.length} progress={progress} onDotClick={snapTo} />
+        </>
+      )}
     </div>
   );
 }
@@ -370,15 +485,15 @@ function Index() {
       </section>
 
       {/* Press */}
-      <section id="featured" className="border-t border-border py-28 md:py-36">
+      <section id="featured" style={{ background: "#000", paddingTop: "7rem", paddingBottom: "7rem" }}>
         {/* Header */}
         <div className="mx-auto max-w-[1200px] px-6 md:px-12 mb-12">
           <Reveal>
-            <SectionLabel n="04">Press &amp; Features</SectionLabel>
+            <SectionLabel n="04" light>Press &amp; Features</SectionLabel>
           </Reveal>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <Reveal delay={120}>
-              <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+              <h2 className="display" style={{ fontSize: "clamp(36px, 4vw, 56px)", color: "white" }}>
                 Featured in.
               </h2>
             </Reveal>
@@ -387,7 +502,8 @@ function Index() {
                 href="https://linkedin.com/in/christopher-biguet"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-3 border-b border-foreground pb-2 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                style={{ color: "white", borderBottomColor: "rgba(255,255,255,0.5)" }}
+                className="inline-flex items-center gap-3 border-b pb-2 text-[12px] font-medium uppercase tracking-[0.22em] transition-all duration-300 hover:gap-5"
               >
                 See more on LinkedIn
                 <span aria-hidden>→</span>
@@ -396,7 +512,7 @@ function Index() {
           </div>
         </div>
 
-        {/* Horizontal scroll carousel */}
+        {/* Apple-style physics carousel */}
         <PressCarousel items={press} />
 
       </section>
