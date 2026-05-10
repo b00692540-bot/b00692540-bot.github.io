@@ -30,13 +30,27 @@ const education = [
 ];
 
 const press = [
-  { tag: "United Nations · MBA Consultancy", title: "UNCTAD Pro Bono Consultancy — Fundraising Strategy & Financial Roadmap", href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/Start_UN_Frame.jpg" },
-  { tag: "Forbes · 2023", title: "Angelo Sosa's Kembara Is a Love Letter to His Asian Travels", href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/", img: "/press-forbes.jpg" },
-  { tag: "JustLuxe · Luxury Travel", title: "Tradition Plays Key Role in Service & Style at The St. Regis Washington DC", href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/", img: "/press-justluxe.jpg" },
-  { tag: "Wine Spectator · Award", title: "Kembara, Phoenix — Award of Excellence", href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara", img: "/press-winespectator.jpg" },
-  { tag: "Video · JW Marriott", title: "Kembara at JW Marriott Desert Ridge", href: "https://www.youtube.com/watch?v=4_dFKeIZPs4", img: "/press-youtube.jpg" },
-  { tag: "Instagram · Feature", title: "Kembara by Angelo Sosa — Behind the Concept", href: "https://www.instagram.com/p/C4_Qh4eOF-y/", img: "/press-instagram.jpg" },
-  { tag: "World Itineraries · 2019", title: "The St. Regis Washington: Lavish, Historic & Neighbouring the White House", href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/", img: "/press-worlditineraries.jpg" },
+  { href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/Start_UN_Frame.jpg", lightText: true,
+    title: "United Nation\nMBA Project",
+    body: "UNCTAD Consultancy Mission\nPresent Fundraising\nStrategy And Financial Roadmap" },
+  { href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/", img: "/press-forbes.jpg", lightText: true,
+    title: "Forbes Magazine\n2023",
+    body: "Angelo Sosa's Kembara\nIs A Love Letter To His Asian Travels" },
+  { href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/", img: "/press-justluxe.jpg", lightText: true,
+    title: "JustLuxe Magazine\nLuxury Travel North America",
+    body: "The St Regis Washington DC\nService & Style Anchored In Tradition" },
+  { href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara", img: "/press-winespectator.jpg", lightText: false,
+    title: "Wine Spectator Award\n2025",
+    body: "Kembara, Phoenix\nAward Of Excellence" },
+  { href: "https://www.youtube.com/watch?v=4_dFKeIZPs4", img: "/press-youtube.jpg", lightText: false,
+    title: "Arizona Daily Mix\nCW7 Arizona 2024",
+    body: "New Restaurant Kembara\nAt JW Marriott Desert Ridge, Phoenix" },
+  { href: "https://www.instagram.com/p/C4_Qh4eOF-y/", img: "/press-instagram.jpg", lightText: true,
+    title: "Instagram\nKembaraPHX",
+    body: "Kembara\nBehind The Concept Operations" },
+  { href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/", img: "/press-worlditineraries.jpg", lightText: true,
+    title: "World Itineraries Blog\n2019",
+    body: "The St Regis Washington DC\nLavish, Historic Political Landmark" },
 ];
 
 const certs = [
@@ -145,13 +159,32 @@ function CarouselCard({
   const loopLen = N * 3;
   const LOOP_OFFSET = N;
 
-  // Active card: opacity 1.0 — adjacent/peeking: 0.7, interpolated in between
+  // Card opacity — dim peeking cards, full on active
   const opacity = useTransform(progress, (prog) => {
     const activeVI = prog + LOOP_OFFSET;
     const dist = Math.abs(virtualIndex - activeVI);
     const minDist = Math.min(dist, loopLen - dist);
     return minDist <= 1 ? 0.7 + 0.3 * Math.max(0, 1 - minDist) : 0.7;
   });
+
+  // Text slide-in — title slides down from above, body slides up from below
+  const dist = useTransform(progress, (prog) => {
+    const activeVI = prog + LOOP_OFFSET;
+    const d = Math.abs(virtualIndex - activeVI);
+    return Math.min(d, loopLen - d);
+  });
+  const titleY  = useTransform(dist, [0, 0.7], [0, -14]);
+  const bodyY   = useTransform(dist, [0, 0.7], [0,  14]);
+  const textOp  = useTransform(dist, [0, 0.55], [1,  0]);
+
+  const tc = p.lightText ? "rgba(255,255,255,0.95)" : "rgba(10,10,10,0.92)";
+  const tc2 = p.lightText ? "rgba(255,255,255,0.70)" : "rgba(10,10,10,0.60)";
+  const pad = "clamp(20px,2.8vw,36px)";
+
+  // Dual-vignette gradient for text legibility — adapts to light/dark image
+  const vignette = p.lightText
+    ? "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, transparent 38%, transparent 58%, rgba(0,0,0,0.62) 100%)"
+    : "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 35%, transparent 60%, rgba(0,0,0,0.35) 100%)";
 
   return (
     <motion.a
@@ -161,30 +194,35 @@ function CarouselCard({
       rel="noreferrer"
       draggable={false}
       style={{
-        flexShrink: 0,
-        width: cardWidth,
-        height: cardHeight,
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: 20,
-        border: "1px solid rgba(255,255,255,0.12)",
-        display: "block",
-        userSelect: "none",
-        background: "#0a0a0a",
-        opacity,
+        flexShrink: 0, width: cardWidth, height: cardHeight,
+        position: "relative", overflow: "hidden", borderRadius: 20,
+        border: "1px solid rgba(255,255,255,0.10)",
+        display: "block", userSelect: "none", background: "#0a0a0a", opacity,
       }}
     >
-      <img
-        src={p.img}
-        alt=""
-        draggable={false}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }}
-      />
-      <div style={{ position: "absolute", top: "clamp(14px,2vw,22px)", right: "clamp(16px,2.5vw,28px)", fontSize: 15, color: "rgba(255,255,255,0.6)" }}>↗</div>
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.90)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", padding: "clamp(14px,2vw,22px) clamp(18px,2.5vw,32px) clamp(18px,2.5vw,28px)" }}>
-        <span style={{ display: "block", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(0,0,0,0.45)", marginBottom: 8 }}>{p.tag}</span>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(15px,1.6vw,22px)", fontWeight: 700, lineHeight: 1.3, color: "#000" }}>{p.title}</div>
-      </div>
+      {/* Full-bleed image */}
+      <img src={p.img} alt="" draggable={false}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }} />
+
+      {/* Gradient vignette — top and bottom for text contrast */}
+      <div style={{ position: "absolute", inset: 0, background: vignette }} />
+
+      {/* Title — top left, slides in from above */}
+      <motion.div style={{ position: "absolute", top: pad, left: pad, right: pad, y: titleY, opacity: textOp }}>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(14px,1.5vw,20px)", fontWeight: 700, lineHeight: 1.25, color: tc, whiteSpace: "pre-line" }}>
+          {p.title}
+        </div>
+      </motion.div>
+
+      {/* Link arrow — top right */}
+      <div style={{ position: "absolute", top: pad, right: pad, fontSize: 13, color: p.lightText ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.40)" }}>↗</div>
+
+      {/* Body — bottom left, slides in from below */}
+      <motion.div style={{ position: "absolute", bottom: pad, left: pad, right: pad, y: bodyY, opacity: textOp }}>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(13px,1.3vw,18px)", fontWeight: 500, lineHeight: 1.4, color: tc2, whiteSpace: "pre-line" }}>
+          {p.body}
+        </div>
+      </motion.div>
     </motion.a>
   );
 }
@@ -291,31 +329,31 @@ function PressCarousel({ items }: { items: typeof press }) {
       lastEventMs = now;
 
       // ── AXIS LOCK ─────────────────────────────────────────────────────────
-      // On the first event of a new gesture, decide the axis once and hold it.
-      // After that, every event in this gesture is treated as horizontal —
-      // vertical scroll is fully suppressed until the gesture resets.
+      // Decide horizontal vs vertical once on the first real event of a gesture.
+      // Any horizontal component > 5px locks the axis and suppresses vertical
+      // for the rest of the gesture — mirrors Apple's single-axis commitment.
       if (!axisLocked) {
         const absDX = Math.abs(e.deltaX);
         const absDY = Math.abs(e.deltaY);
-        if (absDX > 3 && absDX >= absDY) {
-          axisLocked = true;        // commit horizontal
+        if (absDX > 5) {
+          axisLocked = true;   // any clear horizontal intent → lock
         } else if (absDY > absDX * 1.5) {
-          return;                   // clearly vertical — let page scroll normally
+          return;              // clearly vertical → let page scroll
         } else {
-          return;                   // ambiguous first event — wait for next one
+          return;              // too small to decide — wait for next event
         }
       }
       // ──────────────────────────────────────────────────────────────────────
 
-      // Axis is horizontal-locked: block ALL vertical scroll for this gesture
+      // Horizontal axis locked — unconditionally block vertical scroll
       e.preventDefault();
       clearTimeout(snapTimer);
 
       const absDX = Math.abs(e.deltaX);
 
       if (absDX < 3) {
-        // Finger slowing/holding — keep axis locked, push snap window back
-        snapTimer = setTimeout(doSnap, 250);
+        // Finger slowing / holding — axis stays locked, push snap back
+        snapTimer = setTimeout(doSnap, 200);
         return;
       }
 
@@ -325,7 +363,8 @@ function PressCarousel({ items }: { items: typeof press }) {
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
 
-      const delay = absDX > 40 ? 100 : 130;
+      // Snap almost immediately after finger lifts — matches Apple timing
+      const delay = absDX > 40 ? 80 : 110;
       snapTimer = setTimeout(doSnap, delay);
     };
 
@@ -601,25 +640,23 @@ function Index() {
           <Reveal>
             <SectionLabel n="04" light>Press &amp; Features</SectionLabel>
           </Reveal>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <Reveal delay={120}>
-              <h2 className="display" style={{ fontSize: "clamp(36px, 4vw, 56px)", color: "white" }}>
-                Featured in.
-              </h2>
-            </Reveal>
-            <Reveal delay={240}>
-              <a
-                href="https://linkedin.com/in/christopher-biguet"
-                target="_blank"
-                rel="noreferrer"
-                style={{ color: "white", borderBottomColor: "rgba(255,255,255,0.5)" }}
-                className="inline-flex items-center gap-3 border-b pb-2 text-[12px] font-medium uppercase tracking-[0.22em] transition-all duration-300 hover:gap-5"
-              >
-                See more on LinkedIn
-                <span aria-hidden>→</span>
-              </a>
-            </Reveal>
-          </div>
+          <Reveal delay={120}>
+            <h2 className="display" style={{ fontSize: "clamp(36px, 4vw, 56px)", color: "white" }}>
+              Featured in.
+            </h2>
+          </Reveal>
+          <Reveal delay={240}>
+            <a
+              href="https://linkedin.com/in/christopher-biguet"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "white", borderBottomColor: "rgba(255,255,255,0.5)" }}
+              className="inline-flex items-center gap-3 border-b pb-2 text-[12px] font-medium uppercase tracking-[0.22em] transition-all duration-300 hover:gap-5 mt-4"
+            >
+              See more on LinkedIn
+              <span aria-hidden>→</span>
+            </a>
+          </Reveal>
         </div>
 
         {/* Apple-style physics carousel */}
