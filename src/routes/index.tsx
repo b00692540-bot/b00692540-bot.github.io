@@ -60,91 +60,91 @@ function SectionLabel({ n, children, light }: { n: string; children: React.React
   );
 }
 
-const DOT = 8;
-const DOT_GAP = 6;
-const DOT_STRIDE = DOT + DOT_GAP;
+// Circular shortest-path distance between fractional position p and integer index i in a ring of n
+function circDist(p: number, i: number, n: number) {
+  const d = ((p - i) % n + n) % n;
+  return Math.min(d, n - d);
+}
+
+// One pill per card — animates from circle (8px) to wide rectangle (36px) as it becomes active
+function DotPill({
+  i,
+  n,
+  progress,
+  onClick,
+}: {
+  i: number;
+  n: number;
+  progress: MotionValue<number>;
+  onClick: () => void;
+}) {
+  const width = useTransform(progress, (p) => {
+    const t = Math.max(0, 1 - circDist(p, i, n));
+    return 8 + 28 * t;
+  });
+  const opacity = useTransform(progress, (p) => {
+    const t = Math.max(0, 1 - circDist(p, i, n));
+    return 0.3 + 0.7 * t;
+  });
+  return (
+    <motion.button
+      onClick={onClick}
+      aria-label={`Go to press card ${i + 1}`}
+      style={{
+        width,
+        height: 8,
+        borderRadius: 4,
+        background: "rgba(255,255,255,0.92)",
+        opacity,
+        border: "none",
+        cursor: "pointer",
+        padding: 0,
+        flexShrink: 0,
+      }}
+    />
+  );
+}
 
 function LiquidPill({
-  count,
+  n,
   progress,
   onDotClick,
 }: {
-  count: number;
+  n: number;
   progress: MotionValue<number>;
   onDotClick: (i: number) => void;
 }) {
-  const totalWidth = count * DOT + (count - 1) * DOT_GAP;
-
-  // Trailing edge uses ease-in (t²) so the pill stretches forward then snaps — the liquid feel
-  const pillLeft = useTransform(progress, (p) => {
-    const clamped = Math.max(0, Math.min(count - 1, p));
-    const f = Math.floor(clamped);
-    const t = clamped - f;
-    return (f + t * t) * DOT_STRIDE;
-  });
-
-  // Width bell-curves via sin so it peaks at the midpoint between two dots
-  const pillWidth = useTransform(progress, (p) => {
-    const clamped = Math.max(0, Math.min(count - 1, p));
-    const t = clamped - Math.floor(clamped);
-    return DOT + Math.sin(t * Math.PI) * DOT_STRIDE;
-  });
-
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: 28, paddingBottom: 4 }}>
-      <div
-        style={{
-          background: "rgba(255,255,255,0.07)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderRadius: 24,
-          padding: "10px 16px",
-          border: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <div style={{ position: "relative", width: totalWidth, height: DOT }}>
-          {Array.from({ length: count }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => onDotClick(i)}
-              aria-label={`Go to press card ${i + 1}`}
-              style={{
-                position: "absolute",
-                left: i * DOT_STRIDE,
-                top: 0,
-                width: DOT,
-                height: DOT,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.22)",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-              }}
-            />
-          ))}
-          <motion.div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: pillLeft,
-              width: pillWidth,
-              height: DOT,
-              borderRadius: DOT / 2,
-              background: "rgba(255,255,255,0.92)",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
-      </div>
+    <div
+      style={{
+        display: "inline-flex",
+        gap: 6,
+        alignItems: "center",
+        background: "rgba(255,255,255,0.07)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderRadius: 24,
+        padding: "10px 16px",
+        border: "1px solid rgba(255,255,255,0.14)",
+      }}
+    >
+      {Array.from({ length: n }).map((_, i) => (
+        <DotPill key={i} i={i} n={n} progress={progress} onClick={() => onDotClick(i)} />
+      ))}
     </div>
   );
 }
 
 function PressCarousel({ items }: { items: typeof press }) {
-  const [index, setIndex] = useState(0);
+  const N = items.length;
+  const LOOP_OFFSET = N; // virtual index of first real card (start in middle of 3x loop)
+  const loopItems = [...items, ...items, ...items];
+
   const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const vIndexRef = useRef(LOOP_OFFSET);
+  const prevStrideRef = useRef(0);
 
   useLayoutEffect(() => {
     if (containerRef.current) setContainerWidth(containerRef.current.clientWidth);
@@ -158,60 +158,122 @@ function PressCarousel({ items }: { items: typeof press }) {
   }, []);
 
   const MAX_CARD = 900;
-  const cardWidth =
-    containerWidth > 0
-      ? Math.min(MAX_CARD, containerWidth - 2 * Math.max(24, containerWidth * 0.07))
-      : 0;
+  const cardWidth = containerWidth > 0
+    ? Math.min(MAX_CARD, containerWidth - 2 * Math.max(24, containerWidth * 0.07))
+    : 0;
   const PEEK = containerWidth > 0 ? (containerWidth - cardWidth) / 2 : 0;
   const GAP = 12;
   const STRIDE = cardWidth + GAP;
   const cardHeight = Math.round(cardWidth * (10 / 16));
 
+  // x starts at 0, repositioned on first STRIDE measurement
   const x = useMotionValue(0);
 
-  // Refs so wheel handler always sees latest values without re-binding
-  const indexRef = useRef(index);
-  useEffect(() => { indexRef.current = index; }, [index]);
+  // Reposition silently when STRIDE changes (resize or first measure)
+  useEffect(() => {
+    if (STRIDE > 0 && STRIDE !== prevStrideRef.current) {
+      x.set(-(vIndexRef.current * STRIDE));
+      prevStrideRef.current = STRIDE;
+    }
+  }, [STRIDE, x]);
 
-  const snapTo = (i: number) => {
-    const clamped = Math.max(0, Math.min(items.length - 1, i));
-    animate(x, -(clamped * STRIDE), { type: "spring", stiffness: 300, damping: 30 });
-    setIndex(clamped);
+  const snapTo = (targetVI: number) => {
+    vIndexRef.current = targetVI;
+    animate(x, -(targetVI * STRIDE), {
+      type: "spring",
+      stiffness: 300,
+      damping: 30,
+      onComplete: () => {
+        // After landing, silently reset to middle copy so loop never runs out of track
+        let adj = targetVI;
+        if (targetVI < LOOP_OFFSET) adj = targetVI + N;
+        else if (targetVI >= LOOP_OFFSET + N) adj = targetVI - N;
+        if (adj !== targetVI) {
+          x.set(-(adj * STRIDE));
+          vIndexRef.current = adj;
+        }
+      },
+    });
   };
   const snapToRef = useRef(snapTo);
   useEffect(() => { snapToRef.current = snapTo; });
 
-  // Trackpad horizontal scroll → carousel navigation
+  // Direct trackpad follow — x tracks deltaX in real time, snap fires 100ms after gesture ends
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
-    let accum = 0;
-    let timer: ReturnType<typeof setTimeout>;
+    if (!el || STRIDE === 0) return;
+    let snapTimer: ReturnType<typeof setTimeout>;
     const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 0.5) return;
+      if (Math.abs(e.deltaX) < 2 || Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
       e.preventDefault();
-      accum += e.deltaX;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (Math.abs(accum) > 20) snapToRef.current(accum > 0 ? indexRef.current + 1 : indexRef.current - 1);
-        accum = 0;
-      }, 80);
+      // Soft rubber-band clamp: ±1 card beyond the middle copy
+      const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
+      const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
+      x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(() => {
+        snapToRef.current(Math.round(-x.get() / STRIDE));
+      }, 100);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => { el.removeEventListener("wheel", onWheel); clearTimeout(timer); };
-  }, []);
+    return () => { el.removeEventListener("wheel", onWheel); clearTimeout(snapTimer); };
+  }, [STRIDE, N, LOOP_OFFSET, x]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
+    const vi = -x.get() / STRIDE;
+    const base = Math.round(vi);
     const { velocity, offset } = info;
-    let newIndex = index;
+    let target = base;
     if (Math.abs(velocity.x) > 250 || Math.abs(offset.x) > STRIDE * 0.25) {
-      newIndex = velocity.x < 0 || offset.x < 0 ? index + 1 : index - 1;
+      target = velocity.x < 0 || offset.x < 0 ? Math.floor(vi) + 1 : Math.ceil(vi) - 1;
     }
-    snapTo(newIndex);
+    snapTo(target);
   };
 
-  const progress = useTransform(x, (val) =>
-    STRIDE === 0 ? 0 : Math.max(0, Math.min(items.length - 1, -val / STRIDE))
+  // Progress: circular 0..N-1, wraps seamlessly for infinite loop
+  const progress = useTransform(x, (val) => {
+    if (STRIDE === 0) return 0;
+    const riF = (-val / STRIDE) - LOOP_OFFSET;
+    return ((riF % N) + N) % N;
+  });
+
+  const cardContent = (p: typeof items[0]) => (
+    <>
+      <img
+        src={p.img}
+        alt=""
+        draggable={false}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      />
+      <div style={{ position: "absolute", top: "clamp(14px,2vw,22px)", right: "clamp(16px,2.5vw,28px)", fontSize: 15, color: "rgba(255,255,255,0.6)" }}>↗</div>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: "rgba(255,255,255,0.90)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          padding: "clamp(14px,2vw,22px) clamp(18px,2.5vw,32px) clamp(18px,2.5vw,28px)",
+        }}
+      >
+        <span style={{ display: "block", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(0,0,0,0.45)", marginBottom: 8 }}>
+          {p.tag}
+        </span>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(15px,1.6vw,22px)", fontWeight: 700, lineHeight: 1.3, color: "#000" }}>
+          {p.title}
+        </div>
+      </div>
+    </>
   );
 
   return (
@@ -222,23 +284,15 @@ function PressCarousel({ items }: { items: typeof press }) {
           <div style={{ overflow: "hidden", position: "relative", height: cardHeight }}>
             <motion.div
               drag="x"
-              dragConstraints={{ left: -(items.length - 1) * STRIDE, right: 0 }}
-              dragElastic={0.08}
-              style={{
-                x,
-                position: "absolute",
-                left: PEEK,
-                top: 0,
-                display: "flex",
-                gap: GAP,
-                cursor: dragging ? "grabbing" : "grab",
-              }}
+              dragConstraints={{ left: -((loopItems.length - 1) * STRIDE), right: 0 }}
+              dragElastic={0.02}
+              style={{ x, position: "absolute", left: PEEK, top: 0, display: "flex", gap: GAP, cursor: dragging ? "grabbing" : "grab" }}
               onDragStart={() => setDragging(true)}
               onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
             >
-              {items.map((p) => (
+              {loopItems.map((p, i) => (
                 <a
-                  key={p.href}
+                  key={`${i}-${p.href}`}
                   href={dragging ? undefined : p.href}
                   onClick={(e) => { if (dragging) e.preventDefault(); }}
                   target="_blank"
@@ -257,78 +311,18 @@ function PressCarousel({ items }: { items: typeof press }) {
                     background: "#0a0a0a",
                   }}
                 >
-                  {/* Image fills the card */}
-                  <img
-                    src={p.img}
-                    alt=""
-                    draggable={false}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                    }}
-                  />
-                  {/* ↗ link indicator — white on dark image */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "clamp(14px, 2vw, 22px)",
-                      right: "clamp(16px, 2.5vw, 28px)",
-                      fontSize: 15,
-                      color: "rgba(255,255,255,0.6)",
-                    }}
-                  >
-                    ↗
-                  </div>
-                  {/* Frosted-white bottom panel — black bold title on light background */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      background: "rgba(255,255,255,0.90)",
-                      backdropFilter: "blur(16px)",
-                      WebkitBackdropFilter: "blur(16px)",
-                      padding: "clamp(14px, 2vw, 22px) clamp(18px, 2.5vw, 32px) clamp(18px, 2.5vw, 28px)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "block",
-                        fontSize: 9,
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.22em",
-                        color: "rgba(0,0,0,0.45)",
-                        marginBottom: 8,
-                      }}
-                    >
-                      {p.tag}
-                    </span>
-                    <div
-                      style={{
-                        fontFamily: '"Cormorant Garamond", Georgia, serif',
-                        fontSize: "clamp(15px, 1.6vw, 22px)",
-                        fontWeight: 700,
-                        lineHeight: 1.3,
-                        color: "#000",
-                      }}
-                    >
-                      {p.title}
-                    </div>
-                  </div>
+                  {cardContent(p)}
                 </a>
               ))}
             </motion.div>
           </div>
 
-          {/* Liquid pill pagination */}
-          <LiquidPill count={items.length} progress={progress} onDotClick={snapTo} />
+          {/* Pill — sticky at bottom of viewport while press section is visible */}
+          <div style={{ position: "sticky", bottom: 32, display: "flex", justifyContent: "center", marginTop: 28, zIndex: 10, pointerEvents: "none" }}>
+            <div style={{ pointerEvents: "all" }}>
+              <LiquidPill n={N} progress={progress} onDotClick={(i) => snapTo(LOOP_OFFSET + i)} />
+            </div>
+          </div>
         </>
       )}
     </div>
@@ -538,7 +532,7 @@ function Index() {
       </section>
 
       {/* Press */}
-      <section id="featured" style={{ background: "#000", paddingTop: "7rem", paddingBottom: "7rem" }}>
+      <section id="featured" style={{ background: "#000", paddingTop: "5rem", paddingBottom: "5rem", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
         {/* Header */}
         <div className="mx-auto max-w-[1200px] px-6 md:px-12 mb-12">
           <Reveal>
