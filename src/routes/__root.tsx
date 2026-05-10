@@ -83,7 +83,7 @@ function RootComponent() {
       // Exponential ease-out: fast start, long natural deceleration tail
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      smoothTouch: false, // native momentum on touch devices
+      syncTouch: false, // keep native momentum on touch devices
     });
 
     let rafId: number;
