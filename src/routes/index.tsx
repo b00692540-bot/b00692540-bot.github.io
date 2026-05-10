@@ -4,6 +4,7 @@ import { Nav } from "@/components/editorial/Nav";
 import { Reveal } from "@/components/editorial/Reveal";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import type { PanInfo, MotionValue } from "framer-motion";
+import { MapPin, Building2, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -53,6 +54,51 @@ const press = [
     body: "The St Regis Washington DC\nLavish, Historic Political Landmark" },
 ];
 
+const expertise = [
+  {
+    Icon: MapPin,
+    title: "Market Entry",
+    desc: "Go-to-market strategy and commercial launch across new geographies",
+  },
+  {
+    Icon: Building2,
+    title: "Pre-Opening",
+    desc: "Full commercial infrastructure build from concept to opening night",
+  },
+  {
+    Icon: TrendingUp,
+    title: "Revenue Growth",
+    desc: "P&L ownership, pricing strategy, and regional commercial scaling",
+  },
+];
+
+const experience = [
+  {
+    company: "JW Marriott Desert Ridge",
+    role: "Senior Manager · Marriott International",
+    years: "2023–2025",
+    impact: "Directed $5M Kembara concept launch — brand positioning, pricing strategy and full market entry",
+  },
+  {
+    company: "Aloft & Element Me'aisam, Dubai",
+    role: "Senior Manager · Marriott International",
+    years: "2021–2023",
+    impact: "Acquired Fortune 500 corporate partners; drove 20% event revenue growth through outbound strategy",
+  },
+  {
+    company: "Le Méridien Nice",
+    role: "Manager · Contract Mission · Marriott International",
+    years: "2021",
+    impact: "Diagnosed, restructured and relaunched F&B operations post-shutdown in under 90 days",
+  },
+  {
+    company: "The St. Regis Washington DC",
+    role: "Manager · Marriott International",
+    years: "2018–2020",
+    impact: "Designed pricing strategy and commercial controls for a $2.5M budgeted beverage revenue stream",
+  },
+];
+
 const certs = [
   { name: "Spreadsheet Modelling", issuer: "Harvard University", img: "/Spreadsheet_Certification.jpg" },
   { name: "Financial Accounting", issuer: "AHLEI", img: "/Accounting_Certification.jpg" },
@@ -64,6 +110,22 @@ const certs = [
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
   { name: "Sales Software", issuer: "HubSpot", img: "/Hubspot_SalesSoftware_Certification .png" },
 ];
+
+function ExpertiseStrip() {
+  return (
+    <div className="border-y border-border py-6" style={{ background: "var(--muted)" }}>
+      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 px-6 sm:grid-cols-3 md:px-12">
+        {expertise.map(({ Icon, title, desc }) => (
+          <div key={title} className="flex flex-col items-center gap-3 text-center">
+            <Icon size={20} className="text-accent" strokeWidth={1.5} />
+            <span className="text-sm font-medium text-foreground">{title}</span>
+            <span className="text-xs leading-relaxed text-muted-foreground">{desc}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function SectionLabel({ children, light }: { children: React.ReactNode; light?: boolean }) {
   return (
@@ -537,7 +599,7 @@ function Index() {
 
         <div className="relative mx-auto w-full max-w-[1200px]">
           <Reveal>
-            <span className="eyebrow">Senior Commercial Manager</span>
+            <span className="eyebrow">I build the commercial engine. Then I scale it.</span>
           </Reveal>
           <Reveal delay={80}>
             <h1 className="display mt-6 text-foreground" style={{ fontSize: "clamp(60px, 9vw, 128px)" }}>
@@ -546,7 +608,7 @@ function Index() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-8 max-w-md text-muted-foreground">
-              Commercial strategy, go-to-market execution and luxury concept development across EMEA &amp; APAC.
+              Pre-opening strategy. Market entry. Revenue architecture. Senior commercial leadership across EMEA &amp; APAC.
             </p>
           </Reveal>
           <Reveal delay={320}>
@@ -569,6 +631,9 @@ function Index() {
         </div>
       </section>
 
+      {/* Expertise strip */}
+      <ExpertiseStrip />
+
       {/* Singapore Marina — parallax */}
       <ParallaxImage src="/Singapore_Marina.jpg" alt="Singapore Marina Bay" />
 
@@ -581,14 +646,15 @@ function Index() {
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
-                Where strategy <em>meets</em> execution.
+                From blank page to <em>opening night.</em>
               </h2>
             </Reveal>
             <Reveal delay={240}>
               <p className="mt-8 max-w-lg text-muted-foreground leading-relaxed">
-                Built and launched concepts across six countries, defined brands, 
-                and built teams from inception. Now focused on commercial strategy, market entry, 
-                and growth at a regional level, driven by a desire for greater challenges, scale and complexity.
+                From pre-opening brand builds to regional P&amp;L ownership, I've launched luxury hospitality
+                concepts across six countries and led commercial teams from the ground up. Now operating
+                at a senior regional level — focused on the kind of complexity that requires both
+                strategic clarity and operational follow-through.
               </p>
             </Reveal>
             <Reveal delay={320}>
@@ -614,6 +680,34 @@ function Index() {
                 </div>
               </Reveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Experience */}
+      <section id="experience" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
+          <div className="mb-16 lg:col-span-4 lg:mb-0">
+            <Reveal>
+              <SectionLabel>Experience</SectionLabel>
+            </Reveal>
+          </div>
+          <div className="lg:col-span-8">
+            <div className="relative">
+              {/* Vertical timeline line */}
+              <div className="absolute left-0 top-2 bottom-2 w-px bg-border" />
+              {experience.map((exp, i) => (
+                <Reveal key={exp.company + exp.years} delay={i * 80}>
+                  <div className="relative pl-8 pb-12 last:pb-0">
+                    <div className="absolute left-0 top-[6px] h-2 w-2 -translate-x-[3.5px] rounded-full bg-accent" />
+                    <div className="font-serif text-base font-semibold text-foreground">{exp.company}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">{exp.role}</div>
+                    <div className="mt-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground/60">{exp.years}</div>
+                    <p className="mt-2 max-w-xl text-sm italic text-foreground/70">{exp.impact}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -793,6 +887,7 @@ function Index() {
             <Reveal delay={320}>
               <a
                 href="https://linkedin.com/in/christopher-biguet"
+
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-3 rounded-sm bg-foreground px-6 py-3 text-[12px] font-medium uppercase tracking-[0.18em] text-background transition-all duration-300 hover:bg-accent"
@@ -813,6 +908,11 @@ function Index() {
               </a>
             </Reveal>
           </div>
+          <Reveal delay={480}>
+            <p className="mt-10 text-[11px] uppercase tracking-[0.16em] text-muted-foreground/60">
+              Based in Singapore &nbsp;·&nbsp; Open to relocation across EMEA &amp; APAC
+            </p>
+          </Reveal>
         </div>
       </section>
       {/* Footer */}
