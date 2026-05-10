@@ -135,6 +135,60 @@ function LiquidPill({
   );
 }
 
+// Per-card component so useTransform obeys hooks rules
+function CarouselCard({
+  p, virtualIndex, N, progress, cardWidth, cardHeight, dragging,
+}: {
+  p: typeof press[0]; virtualIndex: number; N: number;
+  progress: MotionValue<number>; cardWidth: number; cardHeight: number; dragging: boolean;
+}) {
+  const loopLen = N * 3;
+  const LOOP_OFFSET = N;
+
+  // Active card: opacity 1.0 — adjacent/peeking: 0.7, interpolated in between
+  const opacity = useTransform(progress, (prog) => {
+    const activeVI = prog + LOOP_OFFSET;
+    const dist = Math.abs(virtualIndex - activeVI);
+    const minDist = Math.min(dist, loopLen - dist);
+    return minDist <= 1 ? 0.7 + 0.3 * Math.max(0, 1 - minDist) : 0.7;
+  });
+
+  return (
+    <motion.a
+      href={dragging ? undefined : p.href}
+      onClick={(e) => { if (dragging) e.preventDefault(); }}
+      target="_blank"
+      rel="noreferrer"
+      draggable={false}
+      style={{
+        flexShrink: 0,
+        width: cardWidth,
+        height: cardHeight,
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: 20,
+        border: "1px solid rgba(255,255,255,0.12)",
+        display: "block",
+        userSelect: "none",
+        background: "#0a0a0a",
+        opacity,
+      }}
+    >
+      <img
+        src={p.img}
+        alt=""
+        draggable={false}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }}
+      />
+      <div style={{ position: "absolute", top: "clamp(14px,2vw,22px)", right: "clamp(16px,2.5vw,28px)", fontSize: 15, color: "rgba(255,255,255,0.6)" }}>↗</div>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(255,255,255,0.90)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", padding: "clamp(14px,2vw,22px) clamp(18px,2.5vw,32px) clamp(18px,2.5vw,28px)" }}>
+        <span style={{ display: "block", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(0,0,0,0.45)", marginBottom: 8 }}>{p.tag}</span>
+        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(15px,1.6vw,22px)", fontWeight: 700, lineHeight: 1.3, color: "#000" }}>{p.title}</div>
+      </div>
+    </motion.a>
+  );
+}
+
 function PressCarousel({ items }: { items: typeof press }) {
   const N = items.length;
   const LOOP_OFFSET = N; // virtual index of first real card (start in middle of 3x loop)
@@ -241,9 +295,9 @@ function PressCarousel({ items }: { items: typeof press }) {
       clearTimeout(snapTimer);
 
       if (absDX < 3) {
-        // Finger barely moving / holding: prevent default snap for a generous window
-        if (absDX > 0) snapTimer = setTimeout(doSnap, 350);
-        return; // don't preventDefault or move x — let page scroll breathe
+        // Finger barely moving / holding — push the snap window back without moving x
+        if (absDX > 0) snapTimer = setTimeout(doSnap, 450);
+        return;
       }
 
       e.preventDefault();
@@ -253,8 +307,8 @@ function PressCarousel({ items }: { items: typeof press }) {
       const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
 
-      // Adaptive delay: fast flick → snap quickly; slow deliberate drag → more patience
-      const delay = absDX > 30 ? 110 : 200;
+      // Fast flick → 200ms; deliberate drag → 300ms (matches Apple's patience)
+      const delay = absDX > 40 ? 200 : 300;
       snapTimer = setTimeout(doSnap, delay);
     };
 
@@ -280,45 +334,6 @@ function PressCarousel({ items }: { items: typeof press }) {
     return ((riF % N) + N) % N;
   });
 
-  const cardContent = (p: typeof items[0]) => (
-    <>
-      <img
-        src={p.img}
-        alt=""
-        draggable={false}
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          pointerEvents: "none",
-          userSelect: "none",
-        }}
-      />
-      <div style={{ position: "absolute", top: "clamp(14px,2vw,22px)", right: "clamp(16px,2.5vw,28px)", fontSize: 15, color: "rgba(255,255,255,0.6)" }}>↗</div>
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: "rgba(255,255,255,0.90)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          padding: "clamp(14px,2vw,22px) clamp(18px,2.5vw,32px) clamp(18px,2.5vw,28px)",
-        }}
-      >
-        <span style={{ display: "block", fontSize: 9, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(0,0,0,0.45)", marginBottom: 8 }}>
-          {p.tag}
-        </span>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(15px,1.6vw,22px)", fontWeight: 700, lineHeight: 1.3, color: "#000" }}>
-          {p.title}
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <div ref={containerRef} style={{ width: "100%" }}>
       {containerWidth > 0 && (
@@ -334,28 +349,16 @@ function PressCarousel({ items }: { items: typeof press }) {
               onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
             >
               {loopItems.map((p, i) => (
-                <a
+                <CarouselCard
                   key={`${i}-${p.href}`}
-                  href={dragging ? undefined : p.href}
-                  onClick={(e) => { if (dragging) e.preventDefault(); }}
-                  target="_blank"
-                  rel="noreferrer"
-                  draggable={false}
-                  style={{
-                    flexShrink: 0,
-                    width: cardWidth,
-                    height: cardHeight,
-                    position: "relative",
-                    overflow: "hidden",
-                    borderRadius: 20,
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    display: "block",
-                    userSelect: "none",
-                    background: "#0a0a0a",
-                  }}
-                >
-                  {cardContent(p)}
-                </a>
+                  p={p}
+                  virtualIndex={i}
+                  N={N}
+                  progress={progress}
+                  cardWidth={cardWidth}
+                  cardHeight={cardHeight}
+                  dragging={dragging}
+                />
               ))}
             </motion.div>
           </div>
