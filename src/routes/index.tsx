@@ -1,9 +1,8 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Reveal } from "@/components/editorial/Reveal";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import type { PanInfo, MotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Building2, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -30,28 +29,92 @@ const education = [
   },
 ];
 
-const press = [
-  { href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn", img: "/Start_UN_Frame.jpg", lightText: true,
-    title: "United Nation\nMBA Project",
-    body: "UNCTAD Consultancy Mission\nPresent Fundraising\nStrategy And Financial Roadmap" },
-  { href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/", img: "/press-forbes.jpg", lightText: true,
-    title: "Forbes Magazine\n2023",
-    body: "Angelo Sosa's Kembara\nIs A Love Letter To His Asian Travels" },
-  { href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/", img: "/press-justluxe.jpg", lightText: true,
-    title: "JustLuxe Magazine\nLuxury Travel North America",
-    body: "The St Regis Washington DC\nService & Style Anchored In Tradition" },
-  { href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara", img: "/press-winespectator.jpg", lightText: false,
-    title: "Wine Spectator Award\n2025",
-    body: "Kembara, Phoenix\nAward Of Excellence" },
-  { href: "https://www.youtube.com/watch?v=4_dFKeIZPs4", img: "/press-youtube.jpg", lightText: false,
-    title: "Arizona Daily Mix\nCW7 Arizona 2024",
-    body: "New Restaurant Kembara\nAt JW Marriott Desert Ridge, Phoenix" },
-  { href: "https://www.instagram.com/p/C4_Qh4eOF-y/", img: "/press-instagram.jpg", lightText: true,
-    title: "Instagram\nKembaraPHX",
-    body: "Kembara\nBehind The Concept Operations" },
-  { href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/", img: "/press-worlditineraries.jpg", lightText: true,
-    title: "World Itineraries Blog\n2019",
-    body: "The St Regis Washington DC\nLavish, Historic Political Landmark" },
+interface AppleCardData {
+  src: string;
+  title: string;
+  category: string;
+  content: React.ReactNode;
+  href?: string;
+}
+
+const pressCards: AppleCardData[] = [
+  {
+    src: "/Start_UN_Frame.jpg",
+    category: "United Nations · ESSEC MBA",
+    title: "UNCTAD\nConsultancy Mission",
+    href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn",
+    content: (
+      <p>
+        Selected as part of the ESSEC Global MBA programme to lead a consultancy mission for UNCTAD — the United Nations Conference on Trade and Development. Presented a comprehensive fundraising strategy and financial roadmap, earning recognition for commercial rigour and cross-functional leadership at the highest international level.
+      </p>
+    ),
+  },
+  {
+    src: "/press-forbes.jpg",
+    category: "Forbes · December 2023",
+    title: "Kembara\nFeature",
+    href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/",
+    content: (
+      <p>
+        Forbes covered the launch of Kembara, JW Marriott Desert Ridge's flagship dining concept — a love letter to Asian culinary heritage conceived by Chef Angelo Sosa. Christopher led the full commercial launch: brand positioning, pricing architecture, and market entry strategy from inception to opening night, including a $5M concept build.
+      </p>
+    ),
+  },
+  {
+    src: "/press-justluxe.jpg",
+    category: "JustLuxe · Luxury Travel",
+    title: "The St. Regis\nWashington DC",
+    href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/",
+    content: (
+      <p>
+        JustLuxe recognised The St. Regis Washington DC for its signature blend of tradition and impeccable service — a property where Christopher designed pricing strategy and commercial controls for a $2.5M budgeted beverage revenue stream, setting the benchmark for the brand's East Coast presence.
+      </p>
+    ),
+  },
+  {
+    src: "/press-winespectator.jpg",
+    category: "Wine Spectator · 2025",
+    title: "Award of\nExcellence",
+    href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara",
+    content: (
+      <p>
+        Kembara at JW Marriott Desert Ridge earned Wine Spectator's prestigious Award of Excellence in 2025, recognising the programme's carefully curated wine selection and the thoughtful commercial approach to beverage strategy that underpinned the restaurant's critical success.
+      </p>
+    ),
+  },
+  {
+    src: "/press-youtube.jpg",
+    category: "CW7 Arizona · 2024",
+    title: "Arizona Daily Mix\nKembara Opening",
+    href: "https://www.youtube.com/watch?v=4_dFKeIZPs4",
+    content: (
+      <p>
+        Arizona's CW7 Daily Mix covered the highly anticipated opening of Kembara at JW Marriott Desert Ridge, spotlighting the concept's culinary storytelling, immersive guest experience, and the commercial strategy behind one of Phoenix's most talked-about restaurant launches of the year.
+      </p>
+    ),
+  },
+  {
+    src: "/press-instagram.jpg",
+    category: "Instagram · KembaraPHX",
+    title: "Behind the\nConcept",
+    href: "https://www.instagram.com/p/C4_Qh4eOF-y/",
+    content: (
+      <p>
+        A behind-the-scenes look at Kembara's concept and operations — from the brand philosophy and interior design to floor-level execution and team culture. A window into the commercial and creative decisions that shaped one of Marriott's most distinctive F&B launches.
+      </p>
+    ),
+  },
+  {
+    src: "/press-worlditineraries.jpg",
+    category: "World Itineraries · 2019",
+    title: "The St. Regis DC\nA Political Landmark",
+    href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/",
+    content: (
+      <p>
+        World Itineraries featured The St. Regis Washington DC as one of America's most storied luxury addresses — lavish, historic, and steps from the White House. Christopher managed commercial and beverage operations during a tenure that cemented his reputation for luxury service standards and strategic revenue management.
+      </p>
+    ),
+  },
 ];
 
 const expertise = [
@@ -136,373 +199,221 @@ function SectionLabel({ children, light }: { children: React.ReactNode; light?: 
   );
 }
 
-// Circular shortest-path distance between fractional position p and integer index i in a ring of n
-function circDist(p: number, i: number, n: number) {
-  const d = ((p - i) % n + n) % n;
-  return Math.min(d, n - d);
+// ── Apple Cards Carousel (Aceternity-style) ──────────────────────────────────
+
+function useOutsideClick(
+  ref: React.RefObject<HTMLElement | null>,
+  callback: () => void,
+) {
+  useEffect(() => {
+    const listener = (e: MouseEvent | TouchEvent) => {
+      if (!ref.current || ref.current.contains(e.target as Node)) return;
+      callback();
+    };
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [ref, callback]);
 }
 
-// One pill per card — animates from circle (8px) to wide rectangle (36px) as it becomes active
-function DotPill({
-  i,
-  n,
-  progress,
-  onClick,
-}: {
-  i: number;
-  n: number;
-  progress: MotionValue<number>;
-  onClick: () => void;
-}) {
-  const width = useTransform(progress, (p) => {
-    const t = Math.max(0, 1 - circDist(p, i, n));
-    return 8 + 28 * t;
-  });
-  const opacity = useTransform(progress, (p) => {
-    const t = Math.max(0, 1 - circDist(p, i, n));
-    return 0.3 + 0.7 * t;
-  });
+function BlurImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [loading, setLoading] = useState(true);
   return (
-    <button
-      onClick={onClick}
-      aria-label={`Go to press card ${i + 1}`}
-      style={{ background: "none", border: "none", cursor: "pointer", padding: "18px 4px", flexShrink: 0, display: "flex", alignItems: "center" }}
-    >
-      <motion.span style={{ width, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.92)", opacity, display: "block", flexShrink: 0 }} />
-    </button>
+    <img
+      className={`transition duration-500 ${loading ? "blur-sm scale-[1.03]" : "blur-0 scale-100"} ${className ?? ""}`}
+      onLoad={() => setLoading(false)}
+      src={src}
+      alt={alt}
+    />
   );
 }
 
-function LiquidPill({
-  n,
-  progress,
-  onDotClick,
-}: {
-  n: number;
-  progress: MotionValue<number>;
-  onDotClick: (i: number) => void;
-}) {
-  return (
-    <div
-      style={{
-        display: "inline-flex",
-        gap: 6,
-        alignItems: "center",
-        background: "rgba(255,255,255,0.07)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        borderRadius: 24,
-        padding: "10px 16px",
-        border: "1px solid rgba(255,255,255,0.14)",
-      }}
-    >
-      {Array.from({ length: n }).map((_, i) => (
-        <DotPill key={i} i={i} n={n} progress={progress} onClick={() => onDotClick(i)} />
-      ))}
-    </div>
-  );
-}
-
-// Per-card component so useTransform obeys hooks rules
-function CarouselCard({
-  p, virtualIndex, N, progress, cardWidth, cardHeight, dragging,
-}: {
-  p: typeof press[0]; virtualIndex: number; N: number;
-  progress: MotionValue<number>; cardWidth: number; cardHeight: number; dragging: boolean;
-}) {
-  const loopLen = N * 3;
-  const LOOP_OFFSET = N;
-
-  // Card opacity — dim peeking cards, full on active
-  const opacity = useTransform(progress, (prog) => {
-    const activeVI = prog + LOOP_OFFSET;
-    const dist = Math.abs(virtualIndex - activeVI);
-    const minDist = Math.min(dist, loopLen - dist);
-    return minDist <= 1 ? 0.7 + 0.3 * Math.max(0, 1 - minDist) : 0.7;
-  });
-
-  // Text slide-in — title slides down from above, body slides up from below
-  const dist = useTransform(progress, (prog) => {
-    const activeVI = prog + LOOP_OFFSET;
-    const d = Math.abs(virtualIndex - activeVI);
-    return Math.min(d, loopLen - d);
-  });
-  const titleY  = useTransform(dist, [0, 0.7], [0, -14]);
-  const bodyY   = useTransform(dist, [0, 0.7], [0,  14]);
-  const textOp  = useTransform(dist, [0, 0.55], [1,  0]);
-
-  const tc = p.lightText ? "rgba(255,255,255,0.95)" : "rgba(10,10,10,0.92)";
-  const tc2 = p.lightText ? "rgba(255,255,255,0.70)" : "rgba(10,10,10,0.60)";
-  const pad = "clamp(20px,2.8vw,36px)";
-
-  // Dual-vignette gradient for text legibility — adapts to light/dark image
-  const vignette = p.lightText
-    ? "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, transparent 38%, transparent 58%, rgba(0,0,0,0.62) 100%)"
-    : "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, transparent 35%, transparent 60%, rgba(0,0,0,0.35) 100%)";
-
-  return (
-    <motion.a
-      href={dragging ? undefined : p.href}
-      onClick={(e) => { if (dragging) e.preventDefault(); }}
-      target="_blank"
-      rel="noreferrer"
-      draggable={false}
-      style={{
-        flexShrink: 0, width: cardWidth, height: cardHeight,
-        position: "relative", overflow: "hidden", borderRadius: 20,
-        border: "1px solid rgba(255,255,255,0.10)",
-        display: "block", userSelect: "none", background: "#0a0a0a", opacity,
-      }}
-    >
-      {/* Full-bleed image */}
-      <img src={p.img} alt="" draggable={false}
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }} />
-
-      {/* Gradient vignette — top and bottom for text contrast */}
-      <div style={{ position: "absolute", inset: 0, background: vignette }} />
-
-      {/* Title — top left, slides in from above */}
-      <motion.div style={{ position: "absolute", top: pad, left: pad, right: pad, y: titleY, opacity: textOp }}>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(19px,1.9vw,25px)", fontWeight: 700, lineHeight: 1.25, color: tc, whiteSpace: "pre-line" }}>
-          {p.title}
-        </div>
-      </motion.div>
-
-      {/* Link arrow — top right */}
-      <div style={{ position: "absolute", top: pad, right: pad, fontSize: 14, color: p.lightText ? "rgba(255,255,255,0.50)" : "rgba(0,0,0,0.40)" }}>↗</div>
-
-      {/* Body — bottom left, slides in from below */}
-      <motion.div style={{ position: "absolute", bottom: pad, left: pad, right: pad, y: bodyY, opacity: textOp }}>
-        <div style={{ fontFamily: '"Cormorant Garamond",Georgia,serif', fontSize: "clamp(18px,1.6vw,23px)", fontWeight: 700, lineHeight: 1.4, color: tc2, whiteSpace: "pre-line" }}>
-          {p.body}
-        </div>
-      </motion.div>
-    </motion.a>
-  );
-}
-
-function PressCarousel({ items }: { items: typeof press }) {
-  const N = items.length;
-  const LOOP_OFFSET = N; // virtual index of first real card (start in middle of 3x loop)
-  const loopItems = [...items, ...items, ...items];
-
-  const [dragging, setDragging] = useState(false);
+function AppleCard({ card, index }: { card: AppleCardData; index: number }) {
+  const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const vIndexRef = useRef(LOOP_OFFSET);
-  const prevStrideRef = useRef(0);
+  const id = `apple-card-${index}`;
 
-  useLayoutEffect(() => {
-    if (containerRef.current) setContainerWidth(containerRef.current.clientWidth);
+  useOutsideClick(containerRef, () => setOpen(false));
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const ro = new ResizeObserver((entries) => setContainerWidth(entries[0].contentRect.width));
-    ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, []);
-
-  const MAX_CARD = 900;
-  const cardWidth = containerWidth > 0
-    ? Math.min(MAX_CARD, containerWidth - 2 * Math.max(24, containerWidth * 0.07))
-    : 0;
-  const PEEK = containerWidth > 0 ? (containerWidth - cardWidth) / 2 : 0;
-  const GAP = 12;
-  const STRIDE = cardWidth + GAP;
-  const cardHeight = Math.round(cardWidth * (10 / 16));
-
-  // x starts at 0, repositioned on first STRIDE measurement
-  const x = useMotionValue(0);
-
-  // Reposition silently when STRIDE changes (resize or first measure)
-  useEffect(() => {
-    if (STRIDE > 0 && STRIDE !== prevStrideRef.current) {
-      x.set(-(vIndexRef.current * STRIDE));
-      prevStrideRef.current = STRIDE;
-    }
-  }, [STRIDE, x]);
-
-  const snapTo = (targetVI: number) => {
-    vIndexRef.current = targetVI;
-    animate(x, -(targetVI * STRIDE), {
-      type: "spring",
-      stiffness: 280,
-      damping: 30,
-      mass: 0.8,
-      onComplete: () => {
-        // After landing, silently reset to middle copy so loop never runs out of track
-        let adj = targetVI;
-        if (targetVI < LOOP_OFFSET) adj = targetVI + N;
-        else if (targetVI >= LOOP_OFFSET + N) adj = targetVI - N;
-        if (adj !== targetVI) {
-          x.set(-(adj * STRIDE));
-          vIndexRef.current = adj;
-        }
-      },
-    });
-  };
-  const snapToRef = useRef(snapTo);
-  useEffect(() => { snapToRef.current = snapTo; });
-
-  // Direct trackpad follow — x tracks finger instantly, snaps immediately on lift
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || STRIDE === 0) return;
-
-    let snapTimer: ReturnType<typeof setTimeout>;
-    let lastNonZeroDeltaX = 0;
-    let lastEventMs = 0;
-    let axisLocked = false;
-    let lastVelocity = 0;  // px/s — used to choose snap threshold
-    let prevAbsDX = 0;     // detect deceleration (momentum ending)
-
-    const doSnap = () => {
-      const vi = -x.get() / STRIDE;
-      const frac = vi - Math.floor(vi);
-      const dir = lastNonZeroDeltaX > 0 ? 1 : lastNonZeroDeltaX < 0 ? -1 : 0;
-      const speed = Math.abs(lastVelocity);
-      let target: number;
-
-      if (speed > 400) {
-        // Fast flick — advance regardless of how little was moved
-        target = dir >= 0 ? Math.floor(vi) + 1 : Math.floor(vi);
-      } else if (speed > 60) {
-        // Gentle slide — 35% threshold (Apple measured ~35-40%)
-        target = dir > 0
-          ? (frac > 0.35 ? Math.floor(vi) + 1 : Math.floor(vi))
-          : (frac < 0.65 ? Math.floor(vi) : Math.floor(vi) + 1);
-      } else {
-        // Slow deliberate drag — standard 50% midpoint
-        target = dir > 0
-          ? (frac > 0.50 ? Math.floor(vi) + 1 : Math.floor(vi))
-          : (frac < 0.50 ? Math.floor(vi) : Math.floor(vi) + 1);
-      }
-
-      lastNonZeroDeltaX = 0;
-      lastVelocity = 0;
-      prevAbsDX = 0;
-      axisLocked = false;
-      snapToRef.current(target);
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      const now = Date.now();
-      const dt = Math.max(1, now - lastEventMs);
-      const isNewGesture = dt > 400;
-
-      if (isNewGesture) {
-        axisLocked = false;
-        lastNonZeroDeltaX = 0;
-        lastVelocity = 0;
-        prevAbsDX = 0;
-      }
-      lastEventMs = now;
-
-      // ── AXIS LOCK — horizontal must be clearly dominant to commit ─────────
-      if (!axisLocked) {
-        const absDX = Math.abs(e.deltaX);
-        const absDY = Math.abs(e.deltaY);
-        if (absDX > 12 && absDX > absDY * 2) {
-          // Clearly horizontal (at least 2× the vertical component) → lock
-          axisLocked = true;
-        } else {
-          // Vertical, diagonal, or ambiguous → let Lenis handle page scroll
-          return;
-        }
-      }
-      // ─────────────────────────────────────────────────────────────────────
-
-      // Committed horizontal — block page scroll and Lenis simultaneously
-      e.preventDefault();
-      e.stopPropagation();
-      clearTimeout(snapTimer);
-
-      const absDX = Math.abs(e.deltaX);
-
-      // Track instantaneous velocity (px/s) for threshold decisions
-      if (absDX > 2) {
-        lastVelocity = (e.deltaX / dt) * 1000;
-        lastNonZeroDeltaX = e.deltaX;
-      }
-
-      // Detect momentum end: deltaX rapidly decreasing → fire snap immediately
-      const isDecelerating = absDX < prevAbsDX * 0.6 && absDX < 15;
-      prevAbsDX = absDX;
-
-      if (absDX < 3) {
-        snapTimer = setTimeout(doSnap, isDecelerating ? 30 : 180);
-        return;
-      }
-
-      const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
-      const MAX_X = -((LOOP_OFFSET - 1) * STRIDE);
-      x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
-
-      // Fire fast — momentum end detection will catch the exact lift point
-      const delay = isDecelerating ? 30 : absDX > 40 ? 60 : 90;
-      snapTimer = setTimeout(doSnap, delay);
-    };
-
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => { el.removeEventListener("wheel", onWheel); clearTimeout(snapTimer); };
-  }, [STRIDE, N, LOOP_OFFSET, x]);
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    const vi = -x.get() / STRIDE;
-    const base = Math.round(vi);
-    const { velocity, offset } = info;
-    let target = base;
-    if (Math.abs(velocity.x) > 250 || Math.abs(offset.x) > STRIDE * 0.25) {
-      target = velocity.x < 0 || offset.x < 0 ? Math.floor(vi) + 1 : Math.ceil(vi) - 1;
-    }
-    snapTo(target);
-  };
-
-  // Progress: circular 0..N-1, wraps seamlessly for infinite loop
-  const progress = useTransform(x, (val) => {
-    if (STRIDE === 0) return 0;
-    const riF = (-val / STRIDE) - LOOP_OFFSET;
-    return ((riF % N) + N) % N;
-  });
 
   return (
-    <div ref={containerRef} style={{ width: "100%" }}>
-      {containerWidth > 0 && (
-        <>
-          {/* Track */}
-          <div style={{ overflow: "hidden", position: "relative", height: cardHeight }}>
+    <>
+      <AnimatePresence>
+        {open && (
+          <div className="fixed inset-0 z-[100] overflow-y-auto">
+            {/* Backdrop */}
             <motion.div
-              drag="x"
-              dragConstraints={{ left: -((loopItems.length - 1) * STRIDE), right: 0 }}
-              dragElastic={0.06}
-              style={{ x, position: "absolute", left: PEEK, top: 0, display: "flex", gap: GAP, cursor: dragging ? "grabbing" : "grab" }}
-              onDragStart={() => setDragging(true)}
-              onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
-            >
-              {loopItems.map((p, i) => (
-                <CarouselCard
-                  key={`${i}-${p.href}`}
-                  p={p}
-                  virtualIndex={i}
-                  N={N}
-                  progress={progress}
-                  cardWidth={cardWidth}
-                  cardHeight={cardHeight}
-                  dragging={dragging}
-                />
-              ))}
-            </motion.div>
-          </div>
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            />
 
-          {/* Pill — sticky at bottom of viewport while press section is visible */}
-          <div style={{ position: "sticky", bottom: 32, display: "flex", justifyContent: "center", marginTop: 28, zIndex: 10, pointerEvents: "none" }}>
-            <div style={{ pointerEvents: "all" }}>
-              <LiquidPill n={N} progress={progress} onDotClick={(i) => snapTo(LOOP_OFFSET + i)} />
+            {/* Expanded card */}
+            <div className="relative z-[101] mx-auto my-10 w-[90%] max-w-4xl pb-10">
+              <motion.div
+                ref={containerRef}
+                layoutId={id}
+                className="overflow-hidden rounded-3xl"
+                style={{ background: "var(--background)" }}
+              >
+                {/* Close button */}
+                <button
+                  onClick={() => setOpen(false)}
+                  aria-label="Close"
+                  className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background text-sm font-medium hover:opacity-80 transition-opacity"
+                >
+                  ✕
+                </button>
+
+                {/* Hero image */}
+                <BlurImage
+                  src={card.src}
+                  alt={card.title}
+                  className="h-64 w-full object-cover md:h-96"
+                />
+
+                {/* Content */}
+                <div className="p-8 md:p-12">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-accent">
+                    {card.category}
+                  </p>
+                  <h3
+                    className="mt-3 font-serif text-3xl font-semibold text-foreground md:text-4xl"
+                    style={{ whiteSpace: "pre-line" }}
+                  >
+                    {card.title}
+                  </h3>
+                  <div className="mt-6 text-sm leading-relaxed text-muted-foreground">
+                    {card.content}
+                  </div>
+                  {card.href && (
+                    <a
+                      href={card.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-8 inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[11px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
+                    >
+                      Read full article
+                      <span aria-hidden>↗</span>
+                    </a>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </div>
-        </>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Card thumbnail */}
+      <motion.button
+        layoutId={id}
+        onClick={() => setOpen(true)}
+        className="relative flex h-[420px] w-64 flex-shrink-0 cursor-pointer flex-col items-start justify-start overflow-hidden rounded-3xl focus:outline-none md:h-[480px] md:w-80"
+        whileHover={{ scale: 1.02 }}
+        transition={{ duration: 0.25 }}
+      >
+        {/* Gradient overlay */}
+        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-b from-black/55 via-transparent to-black/45" />
+
+        {/* Text */}
+        <div className="absolute inset-x-0 top-0 z-30 p-7">
+          <p className="text-left text-[10px] font-medium uppercase tracking-[0.25em] text-white/65">
+            {card.category}
+          </p>
+          <h3
+            className="mt-2 text-left font-serif text-xl font-semibold leading-snug text-white md:text-2xl"
+            style={{ whiteSpace: "pre-line" }}
+          >
+            {card.title}
+          </h3>
+        </div>
+
+        {/* Arrow hint */}
+        <div className="absolute bottom-6 right-6 z-30 text-white/40 text-sm">↗</div>
+
+        {/* Image */}
+        <BlurImage
+          src={card.src}
+          alt={card.title}
+          className="absolute inset-0 z-10 h-full w-full object-cover"
+        />
+      </motion.button>
+    </>
+  );
+}
+
+function AppleCarousel({ items }: { items: AppleCardData[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = trackRef.current;
+    el?.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el?.removeEventListener("scroll", checkScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full">
+      {/* Arrow navigation */}
+      <div className="flex justify-end gap-2 px-6 md:px-12 mb-6">
+        <button
+          onClick={() => trackRef.current?.scrollBy({ left: -340, behavior: "smooth" })}
+          disabled={!canScrollLeft}
+          aria-label="Scroll left"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base disabled:opacity-25 hover:bg-white/20 transition-colors"
+        >
+          ←
+        </button>
+        <button
+          onClick={() => trackRef.current?.scrollBy({ left: 340, behavior: "smooth" })}
+          disabled={!canScrollRight}
+          aria-label="Scroll right"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base disabled:opacity-25 hover:bg-white/20 transition-colors"
+        >
+          →
+        </button>
+      </div>
+
+      {/* Scrollable track */}
+      <div
+        ref={trackRef}
+        className="flex gap-4 overflow-x-auto overscroll-x-contain py-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]"
+        style={{
+          paddingLeft: "max(1.5rem, calc((100vw - 1200px) / 2 + 3rem))",
+          paddingRight: "max(1.5rem, calc((100vw - 1200px) / 2 + 3rem))",
+        }}
+      >
+        {items.map((card, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className="flex-shrink-0"
+          >
+            <AppleCard card={card} index={i} />
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -767,8 +678,8 @@ function Index() {
           </Reveal>
         </div>
 
-        {/* Apple-style physics carousel */}
-        <PressCarousel items={press} />
+        {/* Apple Cards Carousel */}
+        <AppleCarousel items={pressCards} />
 
       </section>
 
