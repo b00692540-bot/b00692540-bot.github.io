@@ -442,6 +442,18 @@ function AppleCarousel({ items }: { items: AppleCardData[] }) {
     let lastDX = 0, lastMs = 0, axisLocked = false, lastVel = 0, prevAbsDX = 0;
 
     const doSnap = () => {
+      // If a fast scroll pushed x outside the middle copy, silently reposition
+      // before launching the spring — this is the fix for the "blocks at max speed" bug.
+      // onComplete is unreliable when springs are cancelled by rapid wheel events.
+      const rawVI = -x.get() / STRIDE;
+      if (rawVI < LOOP_OFFSET) {
+        x.set(-((rawVI + N) * STRIDE));
+        vIndexRef.current = Math.round(rawVI + N);
+      } else if (rawVI >= LOOP_OFFSET + N) {
+        x.set(-((rawVI - N) * STRIDE));
+        vIndexRef.current = Math.round(rawVI - N);
+      }
+
       const vi = -x.get() / STRIDE;
       const frac = vi - Math.floor(vi);
       const dir = lastDX > 0 ? 1 : lastDX < 0 ? -1 : 0;
@@ -470,8 +482,9 @@ function AppleCarousel({ items }: { items: AppleCardData[] }) {
       const isDecel = absDX < prevAbsDX * 0.6 && absDX < 15;
       prevAbsDX = absDX;
       if (absDX < 3) { snapTimer = setTimeout(doSnap, isDecel ? 30 : 180); return; }
-      const MIN_X = -((LOOP_OFFSET + N) * STRIDE);
-      const MAX_X = -(LOOP_OFFSET - 1) * STRIDE;
+      // Use full triple-array bounds so x is never clamped at a copy boundary
+      const MIN_X = -((loopItems.length - 1) * STRIDE);
+      const MAX_X = 0;
       x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
       snapTimer = setTimeout(doSnap, isDecel ? 30 : absDX > 40 ? 60 : 90);
     };
@@ -481,6 +494,15 @@ function AppleCarousel({ items }: { items: AppleCardData[] }) {
   }, [STRIDE, N, LOOP_OFFSET, x]);
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
+    // Same silent-reposition guard as doSnap
+    const rawVI = -x.get() / STRIDE;
+    if (rawVI < LOOP_OFFSET) {
+      x.set(-((rawVI + N) * STRIDE));
+      vIndexRef.current = Math.round(rawVI + N);
+    } else if (rawVI >= LOOP_OFFSET + N) {
+      x.set(-((rawVI - N) * STRIDE));
+      vIndexRef.current = Math.round(rawVI - N);
+    }
     const vi = -x.get() / STRIDE;
     const { velocity, offset } = info;
     let target = Math.round(vi);
