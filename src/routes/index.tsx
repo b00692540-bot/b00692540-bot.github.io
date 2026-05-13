@@ -50,7 +50,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-forbes.jpg",
+    src: "/Angelo_Forbes.png",
     category: "Forbes · December 2023",
     title: "Kembara\nFeature",
     href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/",
@@ -72,7 +72,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-winespectator.jpg",
+    src: "/WineSpectator.png",
     category: "Wine Spectator · 2025",
     title: "Award of\nExcellence",
     href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara",
