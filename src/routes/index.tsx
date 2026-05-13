@@ -318,7 +318,7 @@ function AppleCard({ card, uniqueId, dragging = false }: { card: AppleCardData; 
       <motion.button
         layoutId={id}
         onClick={() => { if (!dragging) setOpen(true); }}
-        className="relative flex h-[420px] w-64 flex-shrink-0 cursor-pointer flex-col items-start justify-start overflow-hidden rounded-3xl focus:outline-none md:h-[480px] md:w-80"
+        className="relative flex h-80 w-56 flex-shrink-0 cursor-pointer flex-col items-start justify-start overflow-hidden rounded-3xl focus:outline-none md:h-[40rem] md:w-96"
         whileHover={dragging ? {} : { scale: 1.02 }}
         transition={{ duration: 0.25 }}
       >
@@ -404,8 +404,8 @@ function AppleCarousel({ items }: { items: AppleCardData[] }) {
     return () => ro.disconnect();
   }, []);
 
-  const CARD_W = containerWidth >= 768 ? 320 : 256;
-  const CARD_H = containerWidth >= 768 ? 480 : 420;
+  const CARD_W = containerWidth >= 768 ? 384 : 224;
+  const CARD_H = containerWidth >= 768 ? 640 : 320;
   const GAP = 16;
   const STRIDE = CARD_W + GAP;
   const PEEK = Math.max(0, (containerWidth - CARD_W) / 2);
