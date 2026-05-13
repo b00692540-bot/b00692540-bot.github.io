@@ -1,9 +1,8 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Reveal } from "@/components/editorial/Reveal";
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
-import type { PanInfo, MotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Building2, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -232,10 +231,10 @@ function BlurImage({ src, alt, className }: { src: string; alt: string; classNam
   );
 }
 
-function AppleCard({ card, uniqueId, dragging = false }: { card: AppleCardData; uniqueId: string; dragging?: boolean }) {
+function AppleCard({ card, index }: { card: AppleCardData; index: number }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const id = uniqueId;
+  const id = `apple-card-${index}`;
 
   useOutsideClick(containerRef, () => setOpen(false));
 
@@ -317,9 +316,9 @@ function AppleCard({ card, uniqueId, dragging = false }: { card: AppleCardData; 
       {/* Card thumbnail */}
       <motion.button
         layoutId={id}
-        onClick={() => { if (!dragging) setOpen(true); }}
+        onClick={() => setOpen(true)}
         className="relative flex h-80 w-56 flex-shrink-0 cursor-pointer flex-col items-start justify-start overflow-hidden rounded-3xl focus:outline-none md:h-[40rem] md:w-96"
-        whileHover={dragging ? {} : { scale: 1.02 }}
+        whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.25 }}
       >
         {/* Gradient overlay */}
@@ -352,219 +351,65 @@ function AppleCard({ card, uniqueId, dragging = false }: { card: AppleCardData; 
   );
 }
 
-// Circular shortest-path distance between fractional position p and integer index i in a ring of n
-function circDist(p: number, i: number, n: number) {
-  const d = ((p - i) % n + n) % n;
-  return Math.min(d, n - d);
-}
-
-function PillDot({ i, n, progress, onClick }: { i: number; n: number; progress: MotionValue<number>; onClick: () => void }) {
-  const width = useTransform(progress, (p) => 8 + 28 * Math.max(0, 1 - circDist(p, i, n)));
-  const opacity = useTransform(progress, (p) => 0.3 + 0.7 * Math.max(0, 1 - circDist(p, i, n)));
-  return (
-    <button
-      onClick={onClick}
-      aria-label={`Go to press card ${i + 1}`}
-      style={{ background: "none", border: "none", cursor: "pointer", padding: "10px 4px", display: "flex", alignItems: "center", flexShrink: 0 }}
-    >
-      <motion.span style={{ width, height: 8, borderRadius: 4, background: "rgba(255,255,255,0.92)", opacity, display: "block", flexShrink: 0 }} />
-    </button>
-  );
-}
-
-function LiquidPill({ n, progress, onDotClick }: { n: number; progress: MotionValue<number>; onDotClick: (i: number) => void }) {
-  return (
-    <div style={{ display: "inline-flex", gap: 6, alignItems: "center", background: "rgba(255,255,255,0.07)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderRadius: 24, padding: "10px 16px", border: "1px solid rgba(255,255,255,0.14)" }}>
-      {Array.from({ length: n }).map((_, i) => (
-        <PillDot key={i} i={i} n={n} progress={progress} onClick={() => onDotClick(i)} />
-      ))}
-    </div>
-  );
-}
-
 function AppleCarousel({ items }: { items: AppleCardData[] }) {
-  const N = items.length;
-  const LOOP_OFFSET = N;
-  const loopItems = [...items, ...items, ...items];
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const x = useMotionValue(0);
-  const vIndexRef = useRef(LOOP_OFFSET);
-  const prevStrideRef = useRef(0);
-
-  useLayoutEffect(() => {
-    if (containerRef.current) setContainerWidth(containerRef.current.clientWidth);
-  }, []);
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const ro = new ResizeObserver(([e]) => setContainerWidth(e.contentRect.width));
-    ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, []);
-
-  const CARD_W = containerWidth >= 768 ? 384 : 224;
-  const CARD_H = containerWidth >= 768 ? 640 : 320;
-  const GAP = 16;
-  const STRIDE = CARD_W + GAP;
-  const PEEK = Math.max(0, (containerWidth - CARD_W) / 2);
-
-  // Reposition silently on resize
-  useEffect(() => {
-    if (STRIDE > 0 && STRIDE !== prevStrideRef.current) {
-      x.set(-(vIndexRef.current * STRIDE));
-      prevStrideRef.current = STRIDE;
-    }
-  }, [STRIDE, x]);
-
-  const snapTo = (targetVI: number) => {
-    vIndexRef.current = targetVI;
-    animate(x, -(targetVI * STRIDE), {
-      type: "spring", stiffness: 280, damping: 30, mass: 0.8,
-      onComplete: () => {
-        // Silently jump to middle copy so the loop never runs out of track
-        let adj = targetVI;
-        if (adj < LOOP_OFFSET) adj += N;
-        else if (adj >= LOOP_OFFSET + N) adj -= N;
-        if (adj !== targetVI) { x.set(-(adj * STRIDE)); vIndexRef.current = adj; }
-      },
-    });
-  };
-  const snapToRef = useRef(snapTo);
-  useEffect(() => { snapToRef.current = snapTo; });
-
-  // Trackpad / horizontal wheel handler
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || STRIDE === 0) return;
-    let snapTimer: ReturnType<typeof setTimeout>;
-    let lastDX = 0, lastMs = 0, axisLocked = false, lastVel = 0, prevAbsDX = 0;
-
-    const doSnap = () => {
-      // If a fast scroll pushed x outside the middle copy, silently reposition
-      // before launching the spring — this is the fix for the "blocks at max speed" bug.
-      // onComplete is unreliable when springs are cancelled by rapid wheel events.
-      const rawVI = -x.get() / STRIDE;
-      if (rawVI < LOOP_OFFSET) {
-        x.set(-((rawVI + N) * STRIDE));
-        vIndexRef.current = Math.round(rawVI + N);
-      } else if (rawVI >= LOOP_OFFSET + N) {
-        x.set(-((rawVI - N) * STRIDE));
-        vIndexRef.current = Math.round(rawVI - N);
-      }
-
-      const vi = -x.get() / STRIDE;
-      const frac = vi - Math.floor(vi);
-      const dir = lastDX > 0 ? 1 : lastDX < 0 ? -1 : 0;
-      const speed = Math.abs(lastVel);
-      let target: number;
-      if (speed > 400) target = dir >= 0 ? Math.floor(vi) + 1 : Math.floor(vi);
-      else if (speed > 60) target = dir > 0 ? (frac > 0.35 ? Math.floor(vi) + 1 : Math.floor(vi)) : (frac < 0.65 ? Math.floor(vi) : Math.floor(vi) + 1);
-      else target = dir > 0 ? (frac > 0.5 ? Math.floor(vi) + 1 : Math.floor(vi)) : (frac < 0.5 ? Math.floor(vi) : Math.floor(vi) + 1);
-      lastDX = 0; lastVel = 0; prevAbsDX = 0; axisLocked = false;
-      snapToRef.current(target);
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      const now = Date.now();
-      const dt = Math.max(1, now - lastMs);
-      if (now - lastMs > 400) { axisLocked = false; lastDX = 0; lastVel = 0; prevAbsDX = 0; }
-      lastMs = now;
-      if (!axisLocked) {
-        if (Math.abs(e.deltaX) > 12 && Math.abs(e.deltaX) > Math.abs(e.deltaY) * 2) axisLocked = true;
-        else return;
-      }
-      e.preventDefault(); e.stopPropagation();
-      clearTimeout(snapTimer);
-      const absDX = Math.abs(e.deltaX);
-      if (absDX > 2) { lastVel = (e.deltaX / dt) * 1000; lastDX = e.deltaX; }
-      const isDecel = absDX < prevAbsDX * 0.6 && absDX < 15;
-      prevAbsDX = absDX;
-      if (absDX < 3) { snapTimer = setTimeout(doSnap, isDecel ? 30 : 180); return; }
-      // Use full triple-array bounds so x is never clamped at a copy boundary
-      const MIN_X = -((loopItems.length - 1) * STRIDE);
-      const MAX_X = 0;
-      x.set(Math.max(MIN_X, Math.min(MAX_X, x.get() - e.deltaX)));
-      snapTimer = setTimeout(doSnap, isDecel ? 30 : absDX > 40 ? 60 : 90);
-    };
-
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => { el.removeEventListener("wheel", onWheel); clearTimeout(snapTimer); };
-  }, [STRIDE, N, LOOP_OFFSET, x]);
-
-  const handleDragEnd = (_: unknown, info: PanInfo) => {
-    // Same silent-reposition guard as doSnap
-    const rawVI = -x.get() / STRIDE;
-    if (rawVI < LOOP_OFFSET) {
-      x.set(-((rawVI + N) * STRIDE));
-      vIndexRef.current = Math.round(rawVI + N);
-    } else if (rawVI >= LOOP_OFFSET + N) {
-      x.set(-((rawVI - N) * STRIDE));
-      vIndexRef.current = Math.round(rawVI - N);
-    }
-    const vi = -x.get() / STRIDE;
-    const { velocity, offset } = info;
-    let target = Math.round(vi);
-    if (Math.abs(velocity.x) > 250 || Math.abs(offset.x) > STRIDE * 0.25)
-      target = velocity.x < 0 || offset.x < 0 ? Math.floor(vi) + 1 : Math.ceil(vi) - 1;
-    snapTo(target);
+  const checkScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
   };
 
-  // progress: circular 0..N-1, drives pill dots
-  const progress = useTransform(x, (val) => {
-    if (STRIDE === 0) return 0;
-    const ri = (-val / STRIDE) - LOOP_OFFSET;
-    return ((ri % N) + N) % N;
-  });
+  useEffect(() => {
+    checkScroll();
+    const el = trackRef.current;
+    el?.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el?.removeEventListener("scroll", checkScroll);
+  }, []);
 
   return (
-    <div ref={containerRef} style={{ width: "100%" }}>
-      {containerWidth > 0 && (
-        <>
-          {/* Arrow navigation */}
-          <div className="flex justify-end gap-2 px-6 md:px-12 mb-6">
-            <button
-              onClick={() => snapTo(vIndexRef.current - 1)}
-              aria-label="Previous"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base hover:bg-white/20 transition-colors"
-            >←</button>
-            <button
-              onClick={() => snapTo(vIndexRef.current + 1)}
-              aria-label="Next"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base hover:bg-white/20 transition-colors"
-            >→</button>
-          </div>
+    <div className="relative w-full">
+      {/* Arrow navigation */}
+      <div className="flex justify-end gap-2 px-6 md:px-12 mb-6">
+        <button
+          onClick={() => trackRef.current?.scrollBy({ left: -400, behavior: "smooth" })}
+          disabled={!canScrollLeft}
+          aria-label="Previous"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base disabled:opacity-25 hover:bg-white/20 transition-colors"
+        >←</button>
+        <button
+          onClick={() => trackRef.current?.scrollBy({ left: 400, behavior: "smooth" })}
+          disabled={!canScrollRight}
+          aria-label="Next"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white text-base disabled:opacity-25 hover:bg-white/20 transition-colors"
+        >→</button>
+      </div>
 
-          {/* Track */}
-          <div style={{ overflow: "hidden", position: "relative", height: CARD_H }}>
-            <motion.div
-              drag="x"
-              dragConstraints={{ left: -((loopItems.length - 1) * STRIDE), right: 0 }}
-              dragElastic={0.06}
-              style={{ x, position: "absolute", left: PEEK, top: 0, display: "flex", gap: GAP, cursor: dragging ? "grabbing" : "grab" }}
-              onDragStart={() => setDragging(true)}
-              onDragEnd={(e, info) => { setDragging(false); handleDragEnd(e, info); }}
-            >
-              {loopItems.map((card, i) => (
-                <AppleCard
-                  key={i}
-                  card={card}
-                  uniqueId={`apple-card-${i}`}
-                  dragging={dragging}
-                />
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Liquid pill — sticky while section is visible */}
-          <div style={{ position: "sticky", bottom: 32, display: "flex", justifyContent: "center", marginTop: 28, zIndex: 10, pointerEvents: "none" }}>
-            <div style={{ pointerEvents: "all" }}>
-              <LiquidPill n={N} progress={progress} onDotClick={(i) => snapTo(LOOP_OFFSET + i)} />
-            </div>
-          </div>
-        </>
-      )}
+      {/* Scrollable track */}
+      <div
+        ref={trackRef}
+        className="flex gap-4 overflow-x-auto py-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]"
+        style={{
+          paddingLeft: "max(1.5rem, calc((100vw - 1200px) / 2 + 3rem))",
+          paddingRight: "max(1.5rem, calc((100vw - 1200px) / 2 + 3rem))",
+        }}
+      >
+        {items.map((card, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.08 }}
+            className="flex-shrink-0"
+          >
+            <AppleCard card={card} index={i} />
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }
