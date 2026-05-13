@@ -83,7 +83,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-youtube.jpg",
+    src: "/AZ_Daily.png",
     category: "CW7 Arizona · 2024",
     title: "Arizona Daily Mix\nKembara Opening",
     href: "https://www.youtube.com/watch?v=4_dFKeIZPs4",
