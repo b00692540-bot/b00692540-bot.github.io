@@ -79,18 +79,18 @@ function RootComponent() {
 
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
     script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
     document.head.appendChild(script);
 
-    (window as Record<string, unknown>).dataLayer =
-      (window as Record<string, unknown>).dataLayer || [];
-    function gtag(...args: unknown[]) {
-      ((window as Record<string, unknown>).dataLayer as unknown[]).push(args);
-    }
-    (window as Record<string, unknown>).gtag = gtag;
-    gtag("js", new Date());
-    gtag("config", GA_ID);
+    const init = document.createElement("script");
+    init.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${GA_ID}');
+    `;
+    document.head.appendChild(init);
   }, []);
 
   useEffect(() => {
