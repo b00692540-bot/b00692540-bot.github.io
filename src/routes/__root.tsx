@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-router";
 import Lenis from "lenis";
 
+const GA_ID = "G-499VWZERQ4";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -73,6 +75,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    (window as Record<string, unknown>).dataLayer =
+      (window as Record<string, unknown>).dataLayer || [];
+    function gtag(...args: unknown[]) {
+      ((window as Record<string, unknown>).dataLayer as unknown[]).push(args);
+    }
+    (window as Record<string, unknown>).gtag = gtag;
+    gtag("js", new Date());
+    gtag("config", GA_ID);
+  }, []);
+
+  useEffect(() => {
+    return router.subscribe("onResolved", () => {
+      const { gtag } = window as Record<string, unknown>;
+      if (typeof gtag === "function") {
+        gtag("config", GA_ID, { page_path: router.latestLocation.pathname });
+      }
+    });
+  }, [router]);
 
   useEffect(() => {
     // Respect prefers-reduced-motion — skip smooth scroll entirely
