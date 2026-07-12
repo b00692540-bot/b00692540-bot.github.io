@@ -95,7 +95,7 @@ function RootComponent() {
 
   useEffect(() => {
     return router.subscribe("onResolved", () => {
-      const { gtag } = window as Record<string, unknown>;
+      const { gtag } = window as unknown as Record<string, unknown>;
       if (typeof gtag === "function") {
         gtag("config", GA_ID, { page_path: router.latestLocation.pathname });
       }
@@ -134,13 +134,15 @@ function RootComponent() {
           "@context": "https://schema.org",
           "@type": "Person",
           "name": "Christopher Biguet",
-          "jobTitle": "Senior Commercial Manager",
+          "jobTitle": "Business Development & Commercial Strategy Consultant",
           "url": "https://christopherbiguet.com",
+          "image": "https://christopherbiguet.com/og-image.jpg",
           "sameAs": ["https://linkedin.com/in/christopher-biguet"],
           "email": "biguet.chris@gmail.com",
+          "address": { "@type": "PostalAddress", "addressCountry": "SG", "addressLocality": "Singapore" },
           "knowsAbout": [
-            "Business Development", "Commercial Strategy",
-            "Digital Transformation", "Luxury Hospitality", "MBA"
+            "Business Development", "Commercial Strategy", "Go-to-Market Strategy",
+            "Project Management", "Digital Transformation", "Luxury Hospitality", "P&L Leadership"
           ],
           "alumniOf": [
             { "@type": "CollegeOrUniversity", "name": "ESSEC Business School" },

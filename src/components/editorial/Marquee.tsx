@@ -4,11 +4,11 @@ const KEYWORDS = [
   "Concept Launch",
   "Digital Transformation",
   "P&L Ownership",
-  "EMEA · APAC",
+  "US · EMEA · APAC",
   "Luxury Hospitality",
   "Business Development",
-  "Customer Experience",
-  "Executive Stakeholders",
+  "Project Management",
+  "AI-Native Builder",
 ];
 
 export function Marquee() {

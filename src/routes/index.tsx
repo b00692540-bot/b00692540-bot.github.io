@@ -2,17 +2,18 @@ import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Nav } from "@/components/editorial/Nav";
 import { Reveal } from "@/components/editorial/Reveal";
+import { Marquee } from "@/components/editorial/Marquee";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Building2, TrendingUp } from "lucide-react";
+import { MapPin, Handshake, Workflow, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 const stats = [
-  { n: "8+", label: "Years", desc: "with Marriott International delivering luxury experiences." },
+  { n: "10", label: "Years", desc: "Building and scaling multi-market businesses across the US, EMEA and APAC." },
   { n: "$5M", label: "Concept Launch", desc: "Brand positioning, pricing strategy and full market entry from inception." },
-  { n: "50+", label: "Team Members", desc: "Recruited, led and grown for new openings across multi-property luxury operations." },
+  { n: "50+", label: "Team Members", desc: "Recruited, led and grown from zero for new openings and complex projects." },
   { n: "6+", label: "Countries", desc: "United States · UAE · France · Belgium · United Kingdom · Singapore." },
 ];
 
@@ -20,7 +21,7 @@ const education = [
   {
     degree: "Global MBA – Master’s in Business Management",
     school: "ESSEC Business School",
-    detail: "MOM-recognized Top-Tier Institution (+20 Compass points) Specialization in Finance, Consulting and Digital Transformation",
+    detail: "Specialization in Finance, Consulting and Digital Transformation — MOM-recognized Top-Tier Institution. Graduating September 2026, Singapore.",
   },
   {
     degree: "Bachelor’s Degree in Hospitality Management",
@@ -39,7 +40,7 @@ interface AppleCardData {
 
 const pressCards: AppleCardData[] = [
   {
-    src: "/Start_UN_Frame.jpg",
+    src: "/Start_UN_Frame.webp",
     category: "United Nations · ESSEC MBA",
     title: "UNCTAD\nConsultancy Mission",
     href: "https://www.linkedin.com/posts/essecgmba-innovation-pedagogicalinnovation-ugcPost-7417134795131953152-qScn",
@@ -50,7 +51,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/Angelo_Forbes.png",
+    src: "/Angelo_Forbes.webp",
     category: "Forbes · December 2023",
     title: "Kembara\nFeature",
     href: "https://www.forbes.com/sites/alywalansky/2023/12/06/angelo-sosas-kembara-is-a-love-letter-to-his-asian-travels/",
@@ -61,7 +62,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-justluxe.jpg",
+    src: "/press-justluxe.webp",
     category: "JustLuxe · Luxury Travel",
     title: "The St. Regis\nWashington DC",
     href: "https://www.justluxe.com/travel/hotels/tradition-plays-key-role-in-service-and-style-at-the-st-regis-washington-dc-38134/",
@@ -72,7 +73,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/WineSpectator.png",
+    src: "/WineSpectator.webp",
     category: "Wine Spectator · 2025",
     title: "Award of\nExcellence",
     href: "https://www.winespectator.com/restaurant-awards/detail/240260/name/kembara",
@@ -83,7 +84,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/AZ_Daily.png",
+    src: "/AZ_Daily.webp",
     category: "CW7 Arizona · 2024",
     title: "Arizona Daily Mix\nKembara Opening",
     href: "https://www.youtube.com/watch?v=4_dFKeIZPs4",
@@ -94,7 +95,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-instagram.jpg",
+    src: "/press-instagram.webp",
     category: "Instagram · KembaraPHX",
     title: "Behind the\nConcept",
     href: "https://www.instagram.com/p/C4_Qh4eOF-y/",
@@ -105,7 +106,7 @@ const pressCards: AppleCardData[] = [
     ),
   },
   {
-    src: "/press-worlditineraries.jpg",
+    src: "/press-worlditineraries.webp",
     category: "World Itineraries · 2019",
     title: "The St. Regis DC\nA Political Landmark",
     href: "https://worlditineraries.co/2019/09/18/the-st-regis-washington-lavish-historic-and-neighbouring-the-white-house/",
@@ -120,13 +121,18 @@ const pressCards: AppleCardData[] = [
 const expertise = [
   {
     Icon: MapPin,
-    title: "Market Entry",
+    title: "Market Entry & GTM",
     desc: "Go-to-market strategy and commercial launch across new geographies",
   },
   {
-    Icon: Building2,
-    title: "Pre-Opening",
-    desc: "Full commercial infrastructure build from concept to opening night",
+    Icon: Handshake,
+    title: "Business Development",
+    desc: "Partnerships, corporate account acquisition and customer base growth",
+  },
+  {
+    Icon: Workflow,
+    title: "Project Delivery",
+    desc: "Digital transformation and complex implementations, from business case to rollout",
   },
   {
     Icon: TrendingUp,
@@ -136,6 +142,12 @@ const expertise = [
 ];
 
 const experience = [
+  {
+    company: "U-Reg · Fintech, Singapore",
+    role: "Consultant · ESSEC Consulting Engagement",
+    years: "2026–Present",
+    impact: "Defining go-to-market and business development strategy for a compliance platform serving financial institutions",
+  },
   {
     company: "JW Marriott Desert Ridge",
     role: "Senior Manager · Marriott International",
@@ -163,21 +175,21 @@ const experience = [
 ];
 
 const certs = [
-  { name: "Spreadsheet Modelling", issuer: "Harvard University", img: "/Spreadsheet_Certification.jpg" },
-  { name: "Financial Accounting", issuer: "AHLEI", img: "/Accounting_Certification.jpg" },
-  { name: "Python for Data Science", issuer: "University of Michigan", img: "/Python_Certification.jpg" },
-  { name: "Power BI", issuer: "Microsoft", img: "/Power_BI_Certification.jpg" },
-  { name: "Tableau Data Visualisation", issuer: "Duke University", img: "/Tableau_Certification.jpg" },
-  { name: "Sales & Marketing", issuer: "AHLEI", img: "/Sales_Certification.jpg" },
-  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", img: "/STR_Certification.jpg" },
+  { name: "Spreadsheet Modelling", issuer: "Harvard University", img: "/Spreadsheet_Certification.webp" },
+  { name: "Financial Accounting", issuer: "AHLEI", img: "/Accounting_Certification.webp" },
+  { name: "Python for Data Science", issuer: "University of Michigan", img: "/Python_Certification.webp" },
+  { name: "Power BI", issuer: "Microsoft", img: "/Power_BI_Certification.webp" },
+  { name: "Tableau Data Visualisation", issuer: "Duke University", img: "/Tableau_Certification.webp" },
+  { name: "Sales & Marketing", issuer: "AHLEI", img: "/Sales_Certification.webp" },
+  { name: "STR Hotel Industry Analytics", issuer: "AHLEI / STR", img: "/STR_Certification.webp" },
   { name: "CRM & CXM Platforms", issuer: "Salesforce · Medallia" },
-  { name: "Sales Software", issuer: "HubSpot", img: "/Hubspot_SalesSoftware_Certification .png" },
+  { name: "Sales Software", issuer: "HubSpot", img: "/Hubspot_Certification.webp" },
 ];
 
 function ExpertiseStrip() {
   return (
     <div className="border-y border-border py-6" style={{ background: "var(--muted)" }}>
-      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 px-6 sm:grid-cols-3 md:px-12">
+      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 px-6 sm:grid-cols-2 lg:grid-cols-4 md:px-12">
         {expertise.map(({ Icon, title, desc }) => (
           <div key={title} className="flex flex-col items-center gap-3 text-center">
             <Icon size={20} className="text-accent" strokeWidth={1.5} />
@@ -227,6 +239,8 @@ function BlurImage({ src, alt, className }: { src: string; alt: string; classNam
       onLoad={() => setLoading(false)}
       src={src}
       alt={alt}
+      loading="lazy"
+      decoding="async"
     />
   );
 }
@@ -487,8 +501,9 @@ function Index() {
         {/* Hero photo — mobile: full background with bottom gradient */}
         <div className="pointer-events-none absolute inset-0 lg:hidden">
           <img
-            src="/Christopher_hero.jpg"
+            src="/Christopher_hero.webp"
             alt=""
+            fetchPriority="high"
             className="h-full w-full object-cover object-top"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/50 to-background" />
@@ -497,8 +512,9 @@ function Index() {
         {/* Hero photo — right side, desktop only */}
         <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[45%] lg:block">
           <img
-            src="/Christopher_hero.jpg"
+            src="/Christopher_hero.webp"
             alt="Christopher Biguet"
+            fetchPriority="high"
             className="h-full w-full object-cover object-top"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent" />
@@ -515,7 +531,7 @@ function Index() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-8 max-w-md text-muted-foreground">
-              Pre-opening strategy. Market entry. Revenue architecture. Senior commercial leadership across EMEA &amp; APAC.
+              Business development. Market entry. Project delivery. Commercial leadership from concept to P&amp;L across the US, EMEA &amp; APAC.
             </p>
           </Reveal>
           <Reveal delay={320}>
@@ -542,7 +558,10 @@ function Index() {
       <ExpertiseStrip />
 
       {/* Singapore Marina — parallax */}
-      <ParallaxImage src="/Singapore_Marina.jpg" alt="Singapore Marina Bay" />
+      <ParallaxImage src="/Singapore_Marina.webp" alt="Singapore Marina Bay" />
+
+      {/* Keyword marquee */}
+      <Marquee />
 
       {/* About */}
       <section id="about" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
@@ -553,20 +572,27 @@ function Index() {
             </Reveal>
             <Reveal delay={120}>
               <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
-                From blank page to <em>opening night.</em>
+                Built in operations. <em>Focused on growth.</em>
               </h2>
             </Reveal>
             <Reveal delay={240}>
               <p className="mt-8 max-w-lg text-muted-foreground leading-relaxed">
-                From pre-opening brand builds to regional P&amp;L ownership, I've launched luxury hospitality
-                concepts across six countries and led commercial teams from the ground up. Now operating
-                at a senior regional level — focused on the kind of complexity that requires both
-                strategic clarity and operational follow-through.
+                Ten years building and scaling multi-market businesses across the US, EMEA and APAC —
+                launching concepts from zero, owning P&amp;L, and leading teams of 50+. That operational
+                depth now powers a broader mandate: business development, go-to-market strategy and
+                complex project delivery — currently consulting for a Singapore fintech while completing
+                an MBA at ESSEC Business School.
+              </p>
+            </Reveal>
+            <Reveal delay={300}>
+              <p className="mt-6 max-w-lg text-sm text-muted-foreground/80 leading-relaxed">
+                AI-native by practice: this site — code, design and deployment — plus custom AI agents
+                and automation tools are my own end-to-end builds.
               </p>
             </Reveal>
             <Reveal delay={320}>
               <a
-                href="/SG_Christopher_BIGUET_CV_Manager.pdf"
+                href="/Christopher_Biguet_CV.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="mt-10 inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
@@ -648,7 +674,7 @@ function Index() {
             <Reveal delay={160}>
               <div className="overflow-hidden">
                 <img
-                  src="/Christopher_profile_1.jpeg"
+                  src="/Christopher_profile_1.webp"
                   alt="Christopher Biguet"
                   loading="lazy"
                   className="h-full w-full object-cover object-top"
@@ -722,6 +748,8 @@ function Index() {
                         <img
                           src={c.img}
                           alt={c.name}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full object-contain object-top opacity-90 group-hover:opacity-100 transition-opacity duration-300"
                         />
                       </div>
@@ -762,7 +790,7 @@ function Index() {
       {/* Group Regis — full-width transition */}
       <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden md:h-[75vh]">
         <img
-          src="/Group_Regis.jpeg"
+          src="/Group_Regis.webp"
           alt="The St. Regis"
           loading="lazy"
           className="h-full w-full object-cover object-center"
@@ -787,7 +815,7 @@ function Index() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-6 text-muted-foreground">
-              Open to senior commercial and business development opportunities in luxury hospitality.
+              Open to business development, commercial strategy and project leadership opportunities.
             </p>
           </Reveal>
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
@@ -805,7 +833,7 @@ function Index() {
             </Reveal>
             <Reveal delay={400}>
               <a
-                href="/SG_Christopher_BIGUET_CV_Manager.pdf"
+                href="/Christopher_Biguet_CV.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-3 border-b border-foreground pb-2 pt-3 text-[12px] font-medium uppercase tracking-[0.22em] text-foreground transition-all duration-300 hover:gap-5 hover:text-accent hover:border-accent"
