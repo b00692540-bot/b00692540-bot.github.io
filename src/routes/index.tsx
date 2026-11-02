@@ -19,9 +19,9 @@ const stats = [
 
 const education = [
   {
-    degree: "Global MBA – Master’s in Business Management",
+    degree: "Global MBA · Master’s in Global Business Management and Strategies",
     school: "ESSEC Business School",
-    detail: "Specialization in Finance, Consulting and Digital Transformation — MOM-recognized Top-Tier Institution. Graduating September 2026, Singapore.",
+    detail: "Specialization in Finance, Consulting and Digital Transformation. MOM-recognized Top-Tier Institution. Graduated October 2026, Singapore.",
   },
   {
     degree: "Bachelor’s Degree in Hospitality Management",
@@ -121,32 +121,32 @@ const pressCards: AppleCardData[] = [
 const expertise = [
   {
     Icon: MapPin,
-    title: "Market Entry & GTM",
-    desc: "Go-to-market strategy and commercial launch across new geographies",
+    title: "Regional Program Leadership",
+    desc: "Multi-property rollouts, task forces and standards across markets",
   },
   {
     Icon: Handshake,
-    title: "Business Development",
-    desc: "Partnerships, corporate account acquisition and customer base growth",
+    title: "Commercial Strategy",
+    desc: "Pricing, revenue growth and go-to-market, from concept to P&L",
   },
   {
     Icon: Workflow,
     title: "Project Delivery",
-    desc: "Digital transformation and complex implementations, from business case to rollout",
+    desc: "Business case to rollout: concept launches, platforms and systems",
   },
   {
     Icon: TrendingUp,
-    title: "Revenue Growth",
-    desc: "P&L ownership, pricing strategy, and regional commercial scaling",
+    title: "Multi-Property Operations",
+    desc: "P&L, KPIs and brand standards across properties and outlets",
   },
 ];
 
 const experience = [
   {
-    company: "U-Reg · Fintech, Singapore",
-    role: "Consultant · ESSEC Consulting Engagement",
-    years: "2026–Present",
-    impact: "Defining go-to-market and business development strategy for a compliance platform serving financial institutions",
+    company: "Singapore FinTech Startup",
+    role: "Consultant · ESSEC MBA Capstone",
+    years: "2026",
+    impact: "Built the B2B go-to-market strategy, financial model and competitive analysis for a new SaaS platform",
   },
   {
     company: "JW Marriott Desert Ridge",
@@ -156,7 +156,7 @@ const experience = [
   },
   {
     company: "Aloft & Element Me'aisam, Dubai",
-    role: "Senior Manager · Marriott International",
+    role: "Senior Manager · Head of F&B, Acting Director · Marriott International",
     years: "2021–2023",
     impact: "Acquired Fortune 500 corporate partners; drove 20% event revenue growth through outbound strategy",
   },
@@ -172,6 +172,14 @@ const experience = [
     years: "2018–2020",
     impact: "Designed pricing strategy and commercial controls for a $2.5M budgeted beverage revenue stream",
   },
+];
+
+const programs = [
+  { tag: "JW Marriott Desert Ridge · USA", title: "Kembara $5M Concept Launch", desc: "Celebrity-chef restaurant delivered end to end in 3-4 months: vendors, OS&E, capex and commissioning, reporting to ownership. $300K/month average revenue." },
+  { tag: "Marriott International · USA", title: "Coronado Task Force", desc: "Ran Marriott Coronado F&B for 3 months while keeping JW budget, scheduling and P&L ownership." },
+  { tag: "Aloft & Element · Dubai", title: "Two-Property Standards & Loyalty", desc: "Built operating standards, onboarding, KPIs and system audits across two properties; team won the brand loyalty enrollment challenge two years running." },
+  { tag: "Aloft & Element · Dubai", title: "Mobile Ordering Rollout", desc: "Built the ROI case, secured approval and led the rollout of mobile in-room dining with POS restructuring across 3 outlets, lifting order volume by 30%." },
+  { tag: "Marriott International · Europe", title: "Europe Task Force", desc: "Deployed to a dual-property sister hotel to stabilize F&B operations during an executive transition." },
 ];
 
 const certs = [
@@ -531,7 +539,7 @@ function Index() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-8 max-w-md text-muted-foreground">
-              Business development. Market entry. Project delivery. Commercial leadership from concept to P&amp;L across the US, EMEA &amp; APAC.
+              Regional programs. Commercial leadership. Multi-property operations from concept to P&amp;L across the US, EMEA &amp; APAC.
             </p>
           </Reveal>
           <Reveal delay={320}>
@@ -577,11 +585,7 @@ function Index() {
             </Reveal>
             <Reveal delay={240}>
               <p className="mt-8 max-w-lg text-muted-foreground leading-relaxed">
-                Ten years building and scaling multi-market businesses across the US, EMEA and APAC —
-                launching concepts from zero, owning P&amp;L, and leading teams of 50+. That operational
-                depth now powers a broader mandate: business development, go-to-market strategy and
-                complex project delivery — currently consulting for a Singapore fintech while completing
-                an MBA at ESSEC Business School.
+                8+ years with Marriott International and independent groups across the US, EMEA and APAC: launching concepts from zero, owning multi-property P&amp;L, leading teams of 50+ and deploying across borders to stabilize operations. In October 2026 I completed an MBA at ESSEC in Singapore, including a go-to-market project for a Singapore FinTech startup. I now bring operating depth and commercial strategy to regional roles.
               </p>
             </Reveal>
             <Reveal delay={300}>
@@ -645,6 +649,28 @@ function Index() {
         </div>
       </section>
 
+      {/* Programs & Projects */}
+      <section id="programs" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
+          <div className="mb-16 lg:col-span-4 lg:mb-0">
+            <Reveal>
+              <SectionLabel>Programs &amp; Projects</SectionLabel>
+            </Reveal>
+          </div>
+          <div className="grid gap-10 sm:grid-cols-2 lg:col-span-8">
+            {programs.map((pr, i) => (
+              <Reveal key={pr.title} delay={i * 80}>
+                <div className="border-t border-border pt-6">
+                  <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-accent">{pr.tag}</div>
+                  <div className="mt-3 font-serif text-2xl text-foreground">{pr.title}</div>
+                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{pr.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Education */}
       <section id="education" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
         <div className="mx-auto max-w-[1200px] lg:grid lg:grid-cols-12 lg:gap-16">
@@ -674,8 +700,8 @@ function Index() {
             <Reveal delay={160}>
               <div className="overflow-hidden">
                 <img
-                  src="/Christopher_profile_1.webp"
-                  alt="Christopher Biguet"
+                  src="/ESSEC_Cohort.webp"
+                  alt="ESSEC Global MBA cohort, Singapore campus"
                   loading="lazy"
                   className="h-full w-full object-cover object-top"
                   style={{ maxHeight: "520px" }}
@@ -815,7 +841,7 @@ function Index() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-6 text-muted-foreground">
-              Open to business development, commercial strategy and project leadership opportunities.
+              Open to Senior Manager and Director roles with regional scope in hospitality and related industries.
             </p>
           </Reveal>
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row">
@@ -845,7 +871,7 @@ function Index() {
           </div>
           <Reveal delay={480}>
             <p className="mt-10 text-[11px] uppercase tracking-[0.16em] text-muted-foreground/60">
-              Based in Singapore &nbsp;·&nbsp; Open to relocation across EMEA &amp; APAC
+              Based in Singapore &nbsp;·&nbsp; Open to Singapore, Hong Kong, Shanghai &amp; APAC
             </p>
           </Reveal>
         </div>
