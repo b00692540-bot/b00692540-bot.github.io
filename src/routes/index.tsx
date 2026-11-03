@@ -182,6 +182,13 @@ const programs = [
   { tag: "Marriott International · Europe", title: "Europe Task Force", desc: "Deployed to a dual-property sister hotel to stabilize F&B operations during an executive transition." },
 ];
 
+const practices = [
+  { tag: "Programs", title: "Regional programs", body: "Task forces across hotels and countries, multi-property standards and rollouts that land on time.", no: "01", bg: "#DCE5DD" },
+  { tag: "Launches", title: "Concept launches", body: "From business case to opening night: vendors, OS&E, capex, recruitment and the first P&L.", no: "02", bg: "#EDE3D1" },
+  { tag: "Commercial", title: "Commercial strategy", body: "Pricing, revenue growth, events and go-to-market, backed by the financial model.", no: "03", bg: "#EBD3C6" },
+  { tag: "Operations", title: "Multi-property operations", body: "P&L, KPIs, brand standards and guest satisfaction across properties and outlets.", no: "04", bg: "#DEDDD6" },
+];
+
 const certs = [
   { name: "Spreadsheet Modelling", issuer: "Harvard University", img: "/Spreadsheet_Certification.webp" },
   { name: "Financial Accounting", issuer: "AHLEI", img: "/Accounting_Certification.webp" },
@@ -666,6 +673,49 @@ function Index() {
                   <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{pr.desc}</p>
                 </div>
               </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Practice */}
+      <section id="practice" className="border-t border-border px-6 py-28 md:px-12 md:py-36">
+        <div className="mx-auto max-w-[1200px]">
+          <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
+            <div>
+              <Reveal>
+                <SectionLabel>Practice</SectionLabel>
+              </Reveal>
+              <Reveal delay={120}>
+                <h2 className="display text-foreground" style={{ fontSize: "clamp(36px, 4vw, 56px)" }}>
+                  Four practices, <em>one vision</em>.
+                </h2>
+              </Reveal>
+            </div>
+            <Reveal delay={200}>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                What I bring to a regional team, built across six cities and three continents.
+              </p>
+            </Reveal>
+          </div>
+          <div className="flex flex-col gap-7">
+            {practices.map((p, i) => (
+              <article
+                key={p.no}
+                className="sticky flex min-h-[380px] flex-wrap justify-between gap-8 rounded-[28px] p-8 md:p-12"
+                style={{ top: 110 + i * 26, background: p.bg, color: "#1c1a17", boxShadow: "0 -20px 60px rgba(0,0,0,0.10)" }}
+              >
+                <div className="max-w-xl flex-1 basis-[360px]">
+                  <span className="inline-block rounded-md bg-white/60 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em]">
+                    {p.tag}
+                  </span>
+                  <h3 className="mt-6 font-serif text-5xl font-light leading-none md:text-6xl">{p.title}</h3>
+                  <p className="mt-5 text-base leading-relaxed md:text-lg" style={{ color: "#3d3933" }}>{p.body}</p>
+                </div>
+                <div className="flex flex-none items-center justify-center">
+                  <span className="font-serif font-light leading-none opacity-80" style={{ fontSize: "clamp(120px, 14vw, 220px)" }}>{p.no}</span>
+                </div>
+              </article>
             ))}
           </div>
         </div>
